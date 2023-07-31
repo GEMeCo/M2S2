@@ -56,9 +56,6 @@ Citation
 
 Features
 --------
-- v0.2.0: Dynamic mechanical analysis.
-    - :boom: Newmark-beta time step integration method.
-
 - v0.1.0: Dyadics and Matrices
     - :boom: M2S2::Dyadic2S - Symmetric 2nd rank tensors of 2 or 3 dimensional vector space;
     - :boom: M2S2::Dyadic2N - Asymmetric 2nd rank tensors of 2 or 3 dimensional vector space;
@@ -86,8 +83,11 @@ Software documentation is made directly from annotated sources by doxygen. Use d
 Project Managers
 ----------------
 [Dorival Piedade Neto](http://lattes.cnpq.br/6930392733648456)
+
 [Rodrigo Ribeiro Paccola](https://orcid.org/0000-0002-9228-4180)
+
 [Rogério Carrazedo](https://orcid.org/0000-0003-2750-034X)
+
 
 How to contribute
 -----------------
