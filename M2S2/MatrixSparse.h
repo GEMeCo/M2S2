@@ -50,7 +50,7 @@ namespace M2S2 {
           * @param other sparseMatrix to be moved.
           */
         sparseMatrix(sparseMatrix&& other) noexcept :
-            mv_sym(other.mv_sym), mv_type(other.mv_type), mv_line(std::move(other.mv_line)) { };
+            mv_sym(other.mv_sym), mv_type(other.mv_type), mv_line(std::move(other.mv_line)) { }
 
         /** Destructor.
           */
@@ -80,16 +80,50 @@ namespace M2S2 {
         }
 
         /** Prepare a string to print (to file or screen)
+          * @param precision Number of decimal digits after the decimal point (default is 4)
+          * @param width Minimum number of characters to be written (default is 8)
           */
-        const std::string print() const
+        const std::string print(const int precision = 4, const int width = 8) const
         {
             std::ostringstream output;
-            output << std::endl;
+            unsigned int index;
+
+            output << std::endl << "ATTENTION  : IMPOSE AddEqualTerms() BEFORE PRINTING! It is not going to work otherwise!" << std::endl;
+            if (mv_type == 'C') output << "ATTENTION  : COLUMN MAJOR MATRIX - PRINTING TRANSPOSED!" << std::endl;
+            if (mv_sym) output << std::endl << "ATTENTION  : ONLY HALF WILL BE PRINTED! The rest is going to appear Zero!";
+            output << std::endl << std::fixed;
 
             for (unsigned int i = 0; i < mv_line.size(); i++) {
-                output << mv_line.at(i);
-                output << "\n";
+                assert(mv_line.at(i).mv_assembled); // Only assembled after AddEqualTerms()
             }
+
+            // Begin printing non-zero values
+            for (unsigned int i = 0; i < mv_line.size(); i++) {
+                output << "L:" << i << " ";
+                for (unsigned int j = 0; j < mv_line.at(i).mv_index.size(); j++) {
+                    output << mv_line.at(i).mv_index.at(j) << ":" << mv_line.at(i).mv_value.at(j) << " ";
+                }
+            }
+
+            // Then, print the matrix
+            output << std::endl << std::endl;
+            for (unsigned int i = 0; i < mv_line.size(); i++) {
+                index = 0;
+
+                for (unsigned int j = 0; j < mv_line.at(i).mv_index.size(); j++) {
+                    while (mv_line.at(i).mv_index.at(j) != index) {
+                        output << std::setprecision(0) << mg_zero << " ";
+                        index++;
+                    }
+                    output << std::setw(width) << std::setprecision(precision) << mv_line.at(i).mv_value.at(j) << " ";
+                    index++;
+                }
+                for (unsigned int j = index; j < mv_line.size(); j++) {
+                    output << std::setprecision(0) << mg_zero << " ";
+                }
+                output << std::endl;
+            }
+
             output << std::endl;
             return output.str();
         }
@@ -100,8 +134,8 @@ namespace M2S2 {
           */
         void copy(M2S2::sparseMatrix& other, bool swap)
         {
-            clear();
-            reserve(other.mv_line.size());
+            destroy();
+            resize(other.mv_line.size());
             mv_sym = other.mv_sym;
 
             if (swap) {
@@ -151,7 +185,11 @@ namespace M2S2 {
           */
         void saveAsCSR(M2S2::CSR& other)
         {
-            other.clear();
+            // we must first add equal terms, reducing the size of the matrix
+            addEqualTerms();
+
+            // Clean up current CSR matrix
+            other.destroy();
 
             if (mv_type == 'C' && !mv_sym) { // Not symmetric and column major 
                 // Swap and then save in CSR format
@@ -181,7 +219,6 @@ namespace M2S2 {
                     }
                 }
             }
-            clear();
         }
 
         /** Save current sparse matrix in CSC format. Notice that this will destroy current matrix
@@ -189,7 +226,11 @@ namespace M2S2 {
           */
         void saveAsCSC(M2S2::CSC& other)
         {
-            other.clear();
+            // we must first add equal terms, reducing the size of the matrix
+            addEqualTerms();
+
+            // Clean up current CSC matrix
+            other.destroy();
 
             if (mv_type == 'R' && !mv_sym) { // Not symmetric and column major 
                 // Swap and then save in CSC format
@@ -219,25 +260,34 @@ namespace M2S2 {
                     }
                 }
             }
-            clear();
         }
 
-        /** Reserve capacity to the matrix. Notice that size is not checked (if it is smaller than current).
+        /** Resize the matrix. Notice that size is not checked (if it is smaller than current).
           * @param size Size to be allocated and initiated (usually, the number of DOF).
           */
-        void reserve(const int& size)
+        void resize(const int& size)
         {
-            if (mv_line.size()) clear();
+            if (mv_line.size()) destroy();
             mv_line.resize(size);
         }
 
         /** Removes all elements from the matrix, leaving the container empty
           */
-        void clear()
+        void destroy()
         {
             std::vector<M2S2::line>().swap(mv_line);
             mv_sym = false;
             mv_type = 'R';
+        }
+
+        /** Deletes all elements in every lines, but does not change the sparse matrix size, line capacity, type or symmetry status.
+          * It is just like setting lines to zero.
+          */
+        void clear()
+        {
+            for (int i = 0; i < mv_line.size(); ++i) {
+                mv_line.at(i).clear();
+            }
         }
 
         /** Reserve capacity to a specific line. Notice that size is not checked (if it is smaller than current).
@@ -322,26 +372,38 @@ namespace M2S2 {
             int row, col;
 
             if (mv_sym) {
-                if (mv_type == 'R') {
+                if (mv_type == 'R') {   // col must be >= row
                     for (int i = 0; i < matrix.rows(); i++) {
                         row = indexes.at(i);
                         for (int j = i; j < matrix.cols(); j++) {
                             col = indexes.at(j);
 
-                            mv_line.at(row).mv_index.push_back(col);
-                            mv_line.at(row).mv_value.push_back(matrix.at(i, j));
+                            if (row < col) {
+                                mv_line.at(row).mv_index.push_back(col);
+                                mv_line.at(row).mv_value.push_back(matrix.at(i, j));
+                            }
+                            else {
+                                mv_line.at(col).mv_index.push_back(row);
+                                mv_line.at(col).mv_value.push_back(matrix.at(i, j));
+                            }
                         }
                         mv_line.at(row).mv_assembled = false;
                     }
                 }
-                else {
+                else { // row must be >= col
                     for (int i = 0; i < matrix.rows(); i++) {
                         row = indexes.at(i);
                         for (int j = i; j < matrix.cols(); j++) {
                             col = indexes.at(j);
 
-                            mv_line.at(col).mv_index.push_back(row);
-                            mv_line.at(col).mv_value.push_back(matrix.at(i, j));
+                            if (col < row) {
+                                mv_line.at(col).mv_index.push_back(row);
+                                mv_line.at(col).mv_value.push_back(matrix.at(i, j));
+                            }
+                            else {
+                                mv_line.at(row).mv_index.push_back(col);
+                                mv_line.at(row).mv_value.push_back(matrix.at(i, j));
+                            }
                         }
                         mv_line.at(row).mv_assembled = false;
                     }
@@ -610,25 +672,14 @@ namespace M2S2 {
             if (mv_type == 'C') {
                 int ind;
 
-                if (!mv_sym) {
-                    for (int i = 0; i < mv_line.size(); i++) {
-                        ind = mv_line.at(i).search(index);
-                        if (ind >= 0)
-                            mv_line.at(i).mv_value.at(ind) = value;
-                    }
-                }
-                else {
-                    int col;
-
-                    for (int i = 0; i < mv_line.size(); i++) {
-                        col = mv_line.at(index).mv_index.at(i);
-                        ind = mv_line.at(col).search(index);
-                        mv_line.at(col).mv_value.at(ind) = value;
-                    }
+                for (int i = 0; i < mv_line.size(); i++) {
+                    ind = mv_line.at(i).search(index);
+                    if (ind >= 0)
+                        mv_line.at(i).mv_value.at(ind) = value;
                 }
             }
             else {
-                for (int i = 0; i < mv_line.size(); i++) {
+                for (int i = 0; i < mv_line.at(index).mv_index.size(); i++) {
                     mv_line.at(index).mv_value.at(i) = value;
                 }
             }
@@ -642,26 +693,14 @@ namespace M2S2 {
         {
             if (mv_type == 'R') {
                 int ind;
-
-                if (!mv_sym) {
-                    for (int i = 0; i < mv_line.size(); i++) {
-                        ind = mv_line.at(i).search(index);
-                        if (ind >= 0)
-                            mv_line.at(i).mv_value.at(ind) = value;
-                    }
-                }
-                else {
-                    int col;
-
-                    for (int i = 0; i < mv_line.size(); i++) {
-                        col = mv_line.at(index).mv_index.at(i);
-                        ind = mv_line.at(col).search(index);
-                        mv_line.at(col).mv_value.at(ind) = value;
-                    }
+                for (int i = 0; i < mv_line.size(); i++) {
+                    ind = mv_line.at(i).search(index);
+                    if (ind >= 0)
+                        mv_line.at(i).mv_value.at(ind) = value;
                 }
             }
             else {
-                for (int i = 0; i < mv_line.size(); i++) {
+                for (int i = 0; i < mv_line.at(index).mv_index.size(); i++) {
                     mv_line.at(index).mv_value.at(i) = value;
                 }
             }

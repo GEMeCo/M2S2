@@ -52,7 +52,7 @@ int main()
 	M2S2::Dyadic2S mi_t1({ 10, 1, 2, 3, 4, 5 });
 	M2S2::Dyadic2S mi_t2({ 6, 7, 8, 9, 0, 1 });
 
-	// FThe number of DOF is give by
+	// The number of DOF is given by
 	const int size = 4;
 
 	// We must create a sparseMatrix and then send to a solver

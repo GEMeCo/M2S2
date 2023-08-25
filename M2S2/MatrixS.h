@@ -50,7 +50,7 @@ namespace M2S2 {
 		{
 			mv_nSize = (unsigned int)(0.5 * mv_nCol * mv_nCol + 0.5 * mv_nCol);
 			mv_Values.resize(mv_nSize);
-		};
+		}
 
 		/** Symmetric square matrix of any order.
 		  * @param nCol Number of columns / rows of the square matrix
@@ -60,7 +60,7 @@ namespace M2S2 {
 		{
 			mv_nSize = (unsigned int)(0.5 * mv_nCol * mv_nCol + 0.5 * mv_nCol);
 			mv_Values.resize(mv_nSize, value);
-		};
+		}
 
 		/** Symmetric square matrix of any order.
 		  * @param nCol Number of columns / rows of the square matrix
@@ -81,12 +81,12 @@ namespace M2S2 {
 			mv_nCol = other.mv_nCol;
 			mv_nSize = other.mv_nSize;
 			mv_Values = other.mv_Values;
-		};
+		}
 
 		/** Move constructor for symmetric square matrix of any order.
 		  * @param other Matrix to be moved.
 		  */
-		MatrixS(MatrixS&& other) noexcept : mv_nCol(other.mv_nCol), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) { };
+		MatrixS(MatrixS&& other) noexcept : mv_nCol(other.mv_nCol), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) { }
 
 		/** Destructor.
 		  */
@@ -126,16 +126,18 @@ namespace M2S2 {
 		}
 
 		/** Prepare a string to print (to file or screen)
+		  * @param precision Number of decimal digits after the decimal point (default is 4)
+		  * @param width Minimum number of characters to be written (default is 8)
 		  */
-		const std::string print() const
+		const std::string print(const int precision = 4, const int width = 8) const
 		{
 			std::ostringstream output;
 			output << std::endl;
 			for (unsigned int i = 0; i < mv_nCol; i++) {
-				output << "\t" << std::fixed << std::setprecision(4) << std::setw(8) << at(i, 0);
+				output << "\t" << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, 0);
 
 				for (unsigned int j = 1; j < mv_nCol; j++) {
-					output << " " << std::fixed << std::setprecision(4) << std::setw(8) << at(i, j);
+					output << " " << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, j);
 				}
 				output << "\n";
 			}
@@ -153,6 +155,23 @@ namespace M2S2 {
 			mv_Values.swap(other.mv_Values);
 		}
 
+		/** Set all values to zero. Size remains unchanged.
+		  */
+		void clear()
+		{
+			memset(&mv_Values[0], 0., mv_Values.size() * sizeof(double));
+		}
+
+		/** Resize the matrix.
+		  * @param nCol Number of columns / rows of the square matrix
+		  */
+		void resize(const unsigned int& nCol)
+		{
+			mv_nCol = nCol;
+			mv_nSize = (unsigned int)(0.5 * mv_nCol * mv_nCol + 0.5 * mv_nCol);
+			mv_Values.resize(mv_nSize, 0.);
+		}
+
 		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
 		  * @param j Second component.
@@ -160,7 +179,7 @@ namespace M2S2 {
 		inline double& at(unsigned int i, unsigned int j) {
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nCol - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nCol - i * 0.5 - 0.5) + j);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
@@ -169,7 +188,7 @@ namespace M2S2 {
 		inline const double& at(unsigned int i, unsigned int j) const {
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nCol - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nCol - i * 0.5 - 0.5) + j);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
@@ -178,7 +197,7 @@ namespace M2S2 {
 		inline double& operator()(unsigned int i, unsigned int j) {
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nCol - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nCol - i * 0.5 - 0.5) + j);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
@@ -187,7 +206,7 @@ namespace M2S2 {
 		inline const double& operator()(unsigned int i, unsigned int j) const {
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nCol - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nCol - i * 0.5 - 0.5) + j);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** @return the row size.
 		  */

@@ -3,7 +3,7 @@
 M2S2 is a simple C++ header-only library for linear algebra applied to mechanics of solids and structures. It is under development in Structural Engineering Department, at Sao Carlos School of Engineering, University of Sao Paulo.
 
 <h1 align="center">
-  <img alt="Banner" title="#Banner" height="150" src="./images/Icon.png" />
+  <img alt="Banner" title="#Banner" height="150" src="./images/Icon_150.png" />
 </h1>
 
 ## Copyright Information:

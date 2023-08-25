@@ -56,12 +56,12 @@ namespace M2S2 {
             mv_row = other.mv_row;
             mv_col = other.mv_col;
             mv_value = other.mv_value;
-        };
+        }
 
         /** Move constructor for M2S2 triplet.
           * @param other Triplet to be moved.
           */
-        triplet(triplet&& other) noexcept : mv_row(other.mv_row), mv_col(other.mv_col), mv_value(other.mv_value) { };
+        triplet(triplet&& other) noexcept : mv_row(other.mv_row), mv_col(other.mv_col), mv_value(other.mv_value) { }
 
         /** Destructor.
           */
@@ -101,13 +101,13 @@ namespace M2S2 {
             mv_nz.assign(other.mv_nz.begin(), other.mv_nz.end());
             mv_col.assign(other.mv_col.begin(), other.mv_col.end());
             mv_value.assign(other.mv_value.begin(), other.mv_value.end());
-        };
+        }
 
         /** Move constructor for M2S2 CSR.
           * @param other CSR to be moved.
           */
         CSR(CSR&& other) noexcept 
-            : mv_sym(other.mv_sym), mv_size(other.mv_size), mv_nz(other.mv_nz), mv_col(other.mv_col), mv_value(other.mv_value) { };
+            : mv_sym(other.mv_sym), mv_size(other.mv_size), mv_nz(other.mv_nz), mv_col(other.mv_col), mv_value(other.mv_value) { }
 
         /** Destructor.
           */
@@ -115,7 +115,7 @@ namespace M2S2 {
 
         /** Removes all elements from the matrix, leaving the container empty
           */
-        void clear()
+        void destroy()
         {
             mv_sym = false;
             mv_size = 0;
@@ -166,13 +166,13 @@ namespace M2S2 {
             mv_nz.assign(other.mv_nz.begin(), other.mv_nz.end());
             mv_row.assign(other.mv_row.begin(), other.mv_row.end());
             mv_value.assign(other.mv_value.begin(), other.mv_value.end());
-        };
+        }
 
         /** Move constructor for M2S2 CSC.
           * @param other CSC to be moved.
           */
         CSC(CSC&& other) noexcept
-            : mv_sym(other.mv_sym), mv_size(other.mv_size), mv_nz(other.mv_nz), mv_row(other.mv_row), mv_value(other.mv_value) { };
+            : mv_sym(other.mv_sym), mv_size(other.mv_size), mv_nz(other.mv_nz), mv_row(other.mv_row), mv_value(other.mv_value) { }
 
         /** Destructor.
           */
@@ -180,7 +180,7 @@ namespace M2S2 {
 
         /** Removes all elements from the matrix, leaving the container empty
           */
-        void clear()
+        void destroy()
         {
             mv_sym = false;
             mv_size = 0;
@@ -188,7 +188,6 @@ namespace M2S2 {
             std::vector<int>().swap(mv_nz);
             std::vector<int>().swap(mv_row);
             std::vector<double>().swap(mv_value);
-
 
             mv_nz.clear();
             mv_row.clear();
@@ -341,10 +340,10 @@ namespace M2S2 {
             mv_assembled = false;
         }
 
-        /** Removes all elements from the line, clearing size and capacity.
+        /** Removes all elements from the line, leaving the line empty
           * Notice that std::vector::clear does not change capacity, but here it does.
           */
-        void clear()
+        void destroy()
         {
             if (mv_index.size()) {
                 std::vector<int>().swap(mv_index);
@@ -353,6 +352,16 @@ namespace M2S2 {
                 mv_resizeCount = 0;
                 mv_assembled = false;
             }
+        }
+
+        /** Deletes all elements in the line, but does not change its capacity. Like std::vector::clear()
+          */
+        void clear()
+        {
+            mv_index.clear();
+            mv_value.clear();
+            mv_resizeCount = 0;
+            mv_assembled = false;
         }
 
         /** Overloads operator << to stream the line. */
@@ -375,20 +384,17 @@ namespace M2S2 {
         }
 
         /** Prepare a string to print (to file or screen) line
+          * @param precision Number of decimal digits after the decimal point (default is 4)
+          * @param width Minimum number of characters to be written (default is 8)
           */
-        const std::string print() const
+        const std::string print(const int precision = 4, const int width = 8) const
         {
-            const int mi_nItens = 6;   // Number of itens to be printed per line
             std::ostringstream output;
-            output << "Line size: " << mv_index.size() << "\t";
+            output << "Line size: " << mv_index.size() << "\t" << std::fixed << std::setprecision(precision) << std::setw(width);
             for (int i = 0; i < mv_index.size(); ++i) {
-                if ((i + 1) % mi_nItens) {
-                    output << std::fixed << mv_index.at(i) << ":" << std::scientific << std::setprecision(4) << std::setw(8) << mv_value.at(i) << " ";
-                }
-                else {
-                    output << std::fixed << mv_index.at(i) << ":" << std::scientific << std::setprecision(4) << std::setw(8) << mv_value.at(i) << std::endl;
-                }
+                output << mv_index.at(i) << ":" << mv_value.at(i) << " ";
             }
+            std::cout << std::endl;
             return output.str();
         }
 
@@ -422,6 +428,48 @@ namespace M2S2 {
             // Trying to enhance performance by using a bissection search algorithm
             if (mv_index.size()) {
                 if (!mv_assembled) addEqualTerms();
+                int ib, im, ie;
+                ib = 0;
+                ie = mv_index.size() - 1;
+                if ((mv_index.at(ib) > index) || (mv_index.at(ie) < index))
+                    return -1;
+                if (mv_index.at(ib) == index)
+                    return ib;
+                if (mv_index.at(ie) == index)
+                    return ie;
+
+                /* int iter = 0;*/
+                while ((ie - ib) > 1) {
+                    if (mv_index.at(ib) == index)
+                        return ib;
+                    if (mv_index.at(ie) == index)
+                        return ie;
+                    im = ib + (ie - ib) / 2;
+                    if (mv_index.at(im) == index)
+                        return im;
+                    if (index <= mv_index.at(im)) {
+                        ie = im;
+                    }
+                    else {
+                        ib = im;
+                    }
+                }
+                return -1;
+            }
+            else {
+                return -1;
+            }
+        }
+
+        /** @return the position in line of index. If index is not found return -1.
+          * @param index Index to be found.
+          */
+        int search(int index) const
+        {
+            assert(mv_assembled); // Const version can only be used with already sorted line.
+
+            // Trying to enhance performance by using a bissection search algorithm
+            if (mv_index.size()) {
                 int ib, im, ie;
                 ib = 0;
                 ie = mv_index.size() - 1;

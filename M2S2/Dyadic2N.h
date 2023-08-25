@@ -53,7 +53,7 @@ namespace M2S2 {
 		{
 			mv_nSize = nDim * nDim;
 			mv_Values.resize(mv_nSize);
-		};
+		}
 
 		/** Asymmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param nDim Dimensionality of vector space.
@@ -63,7 +63,7 @@ namespace M2S2 {
 		{
 			mv_nSize = nDim * nDim;
 			mv_Values.resize(mv_nSize, value);
-		};
+		}
 
 		/** Asymmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param value Vector with either 4 or 9 values.
@@ -84,12 +84,12 @@ namespace M2S2 {
 			mv_nDim = other.mv_nDim;
 			mv_nSize = other.mv_nSize;
 			mv_Values = other.mv_Values;
-		};
+		}
 
 		/** Move constructor for asymmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param other Dyadic to be moved.
 		  */
-		Dyadic2N(Dyadic2N&& other) noexcept : mv_nDim(other.mv_nDim), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) { };
+		Dyadic2N(Dyadic2N&& other) noexcept : mv_nDim(other.mv_nDim), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) { }
 
 		/** Destructor.
 		  */
@@ -127,16 +127,18 @@ namespace M2S2 {
 		}
 
 		/** Prepare a string to print (to file or screen)
+		  * @param precision Number of decimal digits after the decimal point (default is 4)
+		  * @param width Minimum number of characters to be written (default is 8)
 		  */
-		const std::string print() const
+		const std::string print(const int precision = 4, const int width = 8) const
 		{
 			std::ostringstream output;
 			output << std::endl;
 			for (unsigned int i = 0; i < mv_nDim; i++) {
-				output << "\t" << std::fixed << std::setprecision(4) << std::setw(8) << at(i, 0);
+				output << "\t" << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, 0);
 
 				for (unsigned int j = 1; j < mv_nDim; j++) {
-					output << " " << std::fixed << std::setprecision(4) << std::setw(8) << at(i, j);
+					output << " " << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, j);
 				}
 				output << "\n";
 			}
@@ -154,29 +156,36 @@ namespace M2S2 {
 			mv_Values.swap(other.mv_Values);
 		}
 
-		/** Access specified element - returns Tensor_ij
-		  * @param i First component.
-		  * @param j Second component.
+		/** Set all values to zero. Size remains unchanged.
 		  */
-		inline double& at(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nDim + j); };
+		void clear()
+		{
+			memset(&mv_Values[0], 0., mv_Values.size() * sizeof(double));
+		}
 
 		/** Access specified element - returns Tensor_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& at(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nDim + j); };
+		inline double& at(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nDim + j); }
 
 		/** Access specified element - returns Tensor_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& operator()(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nDim + j); };
+		inline const double& at(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nDim + j); }
 
 		/** Access specified element - returns Tensor_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& operator()(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nDim + j); };
+		inline double& operator()(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nDim + j); }
+
+		/** Access specified element - returns Tensor_ij
+		  * @param i First component.
+		  * @param j Second component.
+		  */
+		inline const double& operator()(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nDim + j); }
 
 		/** @return the row size.
 		  */
@@ -560,7 +569,8 @@ namespace M2S2 {
 
 			if (mv_nDim == 2) {
 				result.at(0, 0) = det * at(1, 1);
-				result.at(1, 0) = -1. * det * at(0, 1);
+				result.at(0, 1) = -1. * det * at(0, 1);
+				result.at(1, 0) = -1. * det * at(1, 0);
 				result.at(1, 1) = det * at(0, 0);
 			}
 			else
@@ -624,12 +634,10 @@ namespace M2S2 {
 		Dyadic2S getATA() const
 		{
 			Dyadic2S result(mv_nDim);
-			auto& values = result.getVector();
-
 			for (unsigned int i = 0; i < mv_nDim; ++i) {
 				for (unsigned int j = 0; j < mv_nDim; ++j) {
 					for (unsigned int k = 0; k < mv_nDim; ++k) {
-						values.at(i * mv_nDim + j) += mv_Values.at(i * mv_nDim + k) * mv_Values.at(k * mv_nDim + j);
+						result.at(i, j) += mv_Values.at(i * mv_nDim + k) * mv_Values.at(k * mv_nDim + j);
 					}
 				}
 			}

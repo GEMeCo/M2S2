@@ -56,7 +56,7 @@ namespace M2S2 {
 			mv_nVoigt = 3 * nDim - 3;
 			mv_nSize = (unsigned int)(0.5 * mv_nVoigt * mv_nVoigt + 0.5 * mv_nVoigt);
 			mv_Values.resize(mv_nSize);
-		};
+		}
 
 		/** Symmetric 4th order tensor, for 2 or 3 dimensional vector space.
 		  * @param nDim Dimensionality of vector space.
@@ -67,7 +67,7 @@ namespace M2S2 {
 			mv_nVoigt = 3 * nDim - 3;
 			mv_nSize = (unsigned int)(0.5 * mv_nVoigt * mv_nVoigt + 0.5 * mv_nVoigt);
 			mv_Values.resize(mv_nSize, value);
-		};
+		}
 
 		/** Symmetric 4th order tensor, for 2 or 3 dimensional vector space.
 		  * @param value Vector with either 6 or 21 values.
@@ -90,12 +90,12 @@ namespace M2S2 {
 			mv_nSize = other.mv_nSize;
 			mv_nVoigt = other.mv_nVoigt;
 			mv_Values = other.mv_Values;
-		};
+		}
 
 		/** Move constructor for symmetric 4th order tensor, for 2 or 3 dimensional vector space.
 		  * @param other Dyadic to be moved.
 		  */
-		Dyadic4S(Dyadic4S&& other) noexcept : mv_nDim(other.mv_nDim), mv_nSize(other.mv_nSize), mv_nVoigt(other.mv_nVoigt), mv_Values(std::move(other.mv_Values)) { };
+		Dyadic4S(Dyadic4S&& other) noexcept : mv_nDim(other.mv_nDim), mv_nSize(other.mv_nSize), mv_nVoigt(other.mv_nVoigt), mv_Values(std::move(other.mv_Values)) { }
 
 		/** Destructor.
 		  */
@@ -135,16 +135,18 @@ namespace M2S2 {
 		}
 
 		/** Prepare a string to print (to file or screen)
+		  * @param precision Number of decimal digits after the decimal point (default is 4)
+		  * @param width Minimum number of characters to be written (default is 8)
 		  */
-		const std::string print() const
+		const std::string print(const int precision = 4, const int width = 8) const
 		{
 			std::ostringstream output;
 			output << std::endl;
 			for (unsigned int i = 0; i < mv_nVoigt; i++) {
-				output << "\t" << std::fixed << std::setprecision(4) << std::setw(8) << at(i, 0);
+				output << "\t" << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, 0);
 
 				for (unsigned int j = 1; j < mv_nVoigt; j++) {
-					output << " " << std::fixed << std::setprecision(4) << std::setw(8) << at(i, j);
+					output << " " << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, j);
 				}
 				output << "\n";
 			}
@@ -163,6 +165,13 @@ namespace M2S2 {
 			mv_Values.swap(other.mv_Values);
 		}
 
+		/** Set all values to zero. Size remains unchanged.
+		  */
+		void clear()
+		{
+			memset(&mv_Values[0], 0., mv_Values.size() * sizeof(double));
+		}
+
 		/** Access specified element - returns Tensor_ij (in Voigt notation)
 		  * @param i First component.
 		  * @param j Second component.
@@ -170,7 +179,7 @@ namespace M2S2 {
 		inline double& at(unsigned int i, unsigned int j) {
 			unsigned int pos = (i < j) ? (unsigned int)(i * (mv_nVoigt - i * 0.5 - 0.5) + j) : (unsigned int)(j * (mv_nVoigt - j * 0.5 - 0.5) + i);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** Access specified element - returns Tensor_ij (in Voigt notation)
 		  * @param i First component.
@@ -179,7 +188,7 @@ namespace M2S2 {
 		inline const double& at(unsigned int i, unsigned int j) const {
 			unsigned int pos = (i < j) ? (unsigned int)(i * (mv_nVoigt - i * 0.5 - 0.5) + j) : (unsigned int)(j * (mv_nVoigt - j * 0.5 - 0.5) + i);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** Access specified element - returns Tensor_ij (in Voigt notation)
 		  * @param i First component.
@@ -188,7 +197,7 @@ namespace M2S2 {
 		inline double& operator()(unsigned int i, unsigned int j) {
 			unsigned int pos = (i < j) ? (unsigned int)(i * (mv_nVoigt - i * 0.5 - 0.5) + j) : (unsigned int)(j * (mv_nVoigt - j * 0.5 - 0.5) + i);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** Access specified element - returns Tensor_ij (in Voigt notation)
 		  * @param i First component.
@@ -197,7 +206,7 @@ namespace M2S2 {
 		inline const double& operator()(unsigned int i, unsigned int j) const {
 			unsigned int pos = (i < j) ? (unsigned int)(i * (mv_nVoigt - i * 0.5 - 0.5) + j) : (unsigned int)(j * (mv_nVoigt - j * 0.5 - 0.5) + i);
 			return mv_Values.at(pos);
-		};
+		}
 
 		/** @return the row size.
 		  */

@@ -53,7 +53,7 @@ namespace M2S2 {
 		{
 			mv_nSize = mv_nRow * mv_nCol;
 			mv_Values.resize(mv_nSize);
-		};
+		}
 
 		/** 2nd rank matrices of any size. Values are saved in a single vector, as row major.
 		  * @param nRow Number of rows
@@ -64,7 +64,7 @@ namespace M2S2 {
 		{
 			mv_nSize = mv_nRow * mv_nCol;
 			mv_Values.resize(mv_nSize, value);
-		};
+		}
 
 		/** 2nd rank matrices of any size. Values are saved in a single vector, as row major.
 		  * @param nRow Number of rows
@@ -87,13 +87,13 @@ namespace M2S2 {
 			mv_nCol = other.mv_nCol;
 			mv_nSize = other.mv_nSize;
 			mv_Values = other.mv_Values;
-		};
+		}
 
 		/** Move constructor for symmetric square matrix of any order.
 		  * @param other Matrix to be moved.
 		  */
 		MatrixX(MatrixX&& other) noexcept
-			: mv_nRow(other.mv_nRow), mv_nCol(other.mv_nCol), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) { };
+			: mv_nRow(other.mv_nRow), mv_nCol(other.mv_nCol), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) { }
 
 		/** Destructor.
 		  */
@@ -118,16 +118,18 @@ namespace M2S2 {
 		}
 
 		/** Prepare a string to print (to file or screen)
+		  * @param precision Number of decimal digits after the decimal point (default is 4)
+		  * @param width Minimum number of characters to be written (default is 8)
 		  */
-		const std::string print() const
+		const std::string print(const int precision = 4, const int width = 8) const
 		{
 			std::ostringstream output;
 			output << std::endl;
 			for (unsigned int i = 0; i < mv_nRow; i++) {
-				output << "\t" << std::fixed << std::setprecision(4) << std::setw(8) << at(i, 0);
+				output << "\t" << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, 0);
 
 				for (unsigned int j = 1; j < mv_nCol; j++) {
-					output << " " << std::fixed << std::setprecision(4) << std::setw(8) << at(i, j);
+					output << " " << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, j);
 				}
 				output << "\n";
 			}
@@ -146,29 +148,48 @@ namespace M2S2 {
 			mv_Values.swap(other.mv_Values);
 		}
 
-		/** Access specified element - returns Matrix_ij
-		  * @param i First component.
-		  * @param j Second component.
+		/** Set all values to zero. Size remains unchanged.
 		  */
-		inline double& at(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nCol + j); };
+		void clear()
+		{
+			memset(&mv_Values[0], 0., mv_Values.size() * sizeof(double));
+		}
+
+		/** Resize the matrix.
+		  * @param nRow Number of rows
+		  * @param nCol Number of columns
+		  */
+		void resize(const unsigned int& nRow, const unsigned int& nCol)
+		{
+			mv_nRow = nRow;
+			mv_nCol = nCol;
+			mv_nSize = mv_nRow * mv_nCol;
+			mv_Values.resize(mv_nSize, 0.);
+		}
 
 		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& at(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nCol + j); };
+		inline double& at(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nCol + j); }
 
 		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& operator()(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nCol + j); };
+		inline const double& at(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nCol + j); }
 
 		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& operator()(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nCol + j); };
+		inline double& operator()(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nCol + j); }
+
+		/** Access specified element - returns Matrix_ij
+		  * @param i First component.
+		  * @param j Second component.
+		  */
+		inline const double& operator()(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nCol + j); }
 
 		/** @return the row size.
 		  */

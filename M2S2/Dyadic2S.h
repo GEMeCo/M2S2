@@ -52,7 +52,7 @@ namespace M2S2 {
 		{
 			mv_nVoigt = 3 * nDim - 3;
 			mv_Values.resize(mv_nVoigt);
-		};
+		}
 
 		/** Symmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param nDim Dimensionality of vector space.
@@ -62,7 +62,7 @@ namespace M2S2 {
 		{
 			mv_nVoigt = 3 * nDim - 3;
 			mv_Values.resize(mv_nVoigt, value);
-		};
+		}
 
 		/** Symmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param value Vector with either 3 or 6 values.
@@ -83,12 +83,12 @@ namespace M2S2 {
 			mv_nDim = other.mv_nDim;
 			mv_nVoigt = other.mv_nVoigt;
 			mv_Values = other.mv_Values;
-		};
+		}
 
 		/** Move constructor for symmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param other Dyadic to be moved.
 		  */
-		Dyadic2S(Dyadic2S&& other) noexcept : mv_nDim(other.mv_nDim), mv_nVoigt(other.mv_nVoigt), mv_Values(std::move(other.mv_Values)) { };
+		Dyadic2S(Dyadic2S&& other) noexcept : mv_nDim(other.mv_nDim), mv_nVoigt(other.mv_nVoigt), mv_Values(std::move(other.mv_Values)) { }
 
 		/** Destructor.
 		  */
@@ -126,16 +126,18 @@ namespace M2S2 {
 		}
 
 		/** Prepare a string to print (to file or screen)
+		  * @param precision Number of decimal digits after the decimal point (default is 4)
+		  * @param width Minimum number of characters to be written (default is 8)
 		  */
-		const std::string print() const
+		const std::string print(const int precision = 4, const int width = 8) const
 		{
 			std::ostringstream output;
 			output << std::endl;
 			for (unsigned int i = 0; i < mv_nDim; i++) {
-				output << "\t" << std::fixed << std::setprecision(4) << std::setw(8) << at(i, 0);
+				output << "\t" << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, 0);
 
 				for (unsigned int j = 1; j < mv_nDim; j++) {
-					output << " " << std::fixed << std::setprecision(4) << std::setw(8) << at(i, j);
+					output << " " << std::fixed << std::setprecision(precision) << std::setw(width) << at(i, j);
 				}
 				output << "\n";
 			}
@@ -153,29 +155,48 @@ namespace M2S2 {
 			mv_Values.swap(other.mv_Values);
 		}
 
-		/** Access specified element - returns Tensor_ij 
-		  * @param i First component.
-		  * @param j Second component.
+		/** Set all values to zero. Size remains unchanged.
 		  */
-		inline double& at(unsigned int i, unsigned int j) { return mv_Values.at(i + j + bool(i * j)); };
+		void clear()
+		{
+			memset(&mv_Values[0], 0., mv_Values.size() * sizeof(double));
+		}
 
-		/** Access specified element - returns Tensor_ij
+		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& at(unsigned int i, unsigned int j) const { return mv_Values.at(i + j + bool(i * j)); };
+		inline double& at(unsigned int i, unsigned int j) {
+			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+			return mv_Values.at(pos);
+		}
 
-		/** Access specified element - returns Tensor_ij
+		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& operator()(unsigned int i, unsigned int j) { return mv_Values.at(i + j + bool(i * j)); };
+		inline const double& at(unsigned int i, unsigned int j) const {
+			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+			return mv_Values.at(pos);
+		}
 
-		/** Access specified element - returns Tensor_ij
+		/** Access specified element - returns Matrix_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& operator()(unsigned int i, unsigned int j) const { return mv_Values.at(i + j + bool(i * j)); };
+		inline double& operator()(unsigned int i, unsigned int j) {
+			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+			return mv_Values.at(pos);
+		}
+
+		/** Access specified element - returns Matrix_ij
+		  * @param i First component.
+		  * @param j Second component.
+		  */
+		inline const double& operator()(unsigned int i, unsigned int j) const {
+			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+			return mv_Values.at(pos);
+		}
 
 		/** @return the row size.
 		  */
@@ -561,7 +582,7 @@ namespace M2S2 {
 
 			if (mv_nDim == 2) {
 				result.at(0, 0) = det * at(1, 1);
-				result.at(1, 0) = -1. * det * at(0, 1);
+				result.at(0, 1) = -1. * det * at(0, 1);
 				result.at(1, 1) = det * at(0, 0);
 			}
 			else

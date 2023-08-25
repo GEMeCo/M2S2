@@ -158,6 +158,37 @@ namespace M2S2 {
 		return dyadic * alfa;
 	}
 
+	inline MatrixX operator+(const double& alfa, const MatrixX& dyadic)
+	{
+		return dyadic + alfa;
+	}
+
+	inline MatrixX operator-(const double& alfa, const MatrixX& dyadic)
+	{
+		return (dyadic - alfa) * (-1.);
+	}
+
+	inline MatrixX operator*(const double& alfa, const MatrixX& dyadic)
+	{
+		return dyadic * alfa;
+	}
+
+	inline MatrixS operator+(const double& alfa, const MatrixS& dyadic)
+	{
+		return dyadic + alfa;
+	}
+
+	inline MatrixS operator-(const double& alfa, const MatrixS& dyadic)
+	{
+		return (dyadic - alfa) * (-1.);
+	}
+
+	inline MatrixS operator*(const double& alfa, const MatrixS& dyadic)
+	{
+		return dyadic * alfa;
+	}
+
+
 	// ================================================================================================
 	//
 	// Functions
