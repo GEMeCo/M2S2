@@ -14,15 +14,8 @@
 // ================================================================================================
 #pragma once
 
-// Standard libraries
-#include <vector>
-#include <iostream>		// required by std::cout
-#include <iomanip>		// Required by ios manipulations
-#include <sstream>		// required by std::ostringstream
-#include <cmath>		// required by std::sqrt / std::acos
-#include <cassert>		// required by assert
-
-// M2S2 libraries
+// Libraries
+#include "Common.h"
 #include "Dyadic2S.h"
 #include "Dyadic2N.h"
 

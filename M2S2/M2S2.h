@@ -15,6 +15,7 @@
 #pragma once
 
 // M2S2 libraries
+#include "Common.h"
 #include "Dyadic2S.h"
 #include "Dyadic2N.h"
 #include "Dyadic4S.h"
@@ -328,4 +329,40 @@ namespace M2S2 {
 	static inline double contraction(const Dyadic2N& T1, const Dyadic2S& T2) {
 		return contraction(T2, T1);
 	}
+
+	/** @return the transpose of a CSR sparse matrix. Notice that, for symmetric matrices, a row major matrix will become column major matrix.
+	  * 
+	  */
+	static inline CSR transpose(const CSR& input) {
+		CSR output;
+
+		output.mv_rows = input.mv_cols;
+		output.mv_cols = input.mv_rows;
+		output.mv_sym = input.mv_sym;
+		output.mv_value.resize(input.mv_value.size(), 0.0);
+		output.mv_colIndex.resize(input.mv_value.size(), 0);
+		output.mv_rowIndex.resize(input.mv_cols + 2, 0);
+
+		// Number of itens per column
+		for (unsigned int i = 0; i < input.mv_value.size(); ++i) {
+			++output.mv_rowIndex.at(input.mv_colIndex.at(i) + 2);
+		}
+
+		// Generate new rowIndex
+		for (unsigned int i = 2; i < output.mv_rowIndex.size(); ++i) {
+			output.mv_rowIndex.at(i) += output.mv_rowIndex.at(i - 1);
+		}
+
+		// Index of transposed matrix
+		for (unsigned int i = 0; i < input.mv_rows; ++i) {
+			for (unsigned int j = input.mv_rowIndex.at(i); j < input.mv_rowIndex.at(i + 1); ++j) {
+				const unsigned int newIndex = output.mv_rowIndex.at(input.mv_colIndex.at(j) + 1)++;
+				output.mv_value.at(newIndex) = input.mv_value.at(j);
+				output.mv_colIndex.at(newIndex) = i;
+			}
+		}
+		output.mv_rowIndex.pop_back(); // Exclude the extra index
+		return output;
+	}
+
 }  // End of M2S2 namespace

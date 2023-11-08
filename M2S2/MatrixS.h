@@ -14,13 +14,8 @@
 // ================================================================================================
 #pragma once
 
-// Standard libraries
-#include <vector>
-#include <iostream>		// required by std::cout
-#include <iomanip>		// Required by ios manipulations
-#include <sstream>		// required by std::ostringstream
-#include <cmath>		// required by std::sqrt / std::acos
-#include <cassert>		// required by assert
+// Libraries
+#include "Common.h"
 
 // ================================================================================================
 //

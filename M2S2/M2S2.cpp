@@ -15,27 +15,32 @@
 // Std libraries, if any
 #include <iostream>
 
+// Unit tests
+#include "UnitTest.h"
+
 int main()
 {
-	std::cout << "Copyright(C) 2023 Dorival Piedade Neto & Rodrigo Ribeiro Paccola & Rogerio Carrazedo" << std::endl
-		<< "All Rights Reserved." << std::endl
-		<< "Structural Engineering Department" << std::endl
-		<< "University of Sao Paulo at Sao Carlos School of Engineering." << std::endl << std::endl
-		<< "This program is free: you can redistribute it under the terms of the License." << std::endl << std::endl
-		<< "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;" << std::endl
-		<< "Without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE." << std::endl << std::endl
-		<< "It is provided \"AS IS\"." << std::endl
-		<< "In no event shall the authors be liable for any claim, damages or other liability," << std::endl
-		<< "whether in an action of contract, tort or otherwire, arising from, out of or in " << std::endl
-		<< "connection with the software or the use of other dealing in the software." << std::endl << std::endl
-		<< "Neither the name of the copyright holder nor the names of any other contributors" << std::endl
-		<< "may be used to endorse or promote products derived from this software without" << std::endl
-		<< "specific prior written permission." << std::endl << std::endl
-		<< "If you are using, please cite it in your reseach. We have a DOI: " << std::endl
-		<< "Well, not yet :)" << std::endl << std::endl;
+	std::cout << INFO("Copyright(C) 2023 Dorival Piedade Neto & Rodrigo Ribeiro Paccola & Rogerio Carrazedo") << std::endl
+		<< INFO("All Rights Reserved.") << std::endl
+		<< INFO("Structural Engineering Department.") << std::endl
+		<< INFO("University of Sao Paulo at Sao Carlos School of Engineering.") << std::endl << std::endl
+		<< WARN("This program is free: you can redistribute it under the terms of the License.")
+		<< WARN("This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;")
+		<< WARN("Without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
+		<< WARN("It is provided \"AS IS\".") << std::endl
+		<< INFO("In no event shall the authors be liable for any claim, damages or other liability,") << std::endl
+		<< INFO("whether in an action of contract, tort or otherwire, arising from, out of or in ") << std::endl
+		<< INFO("connection with the software or the use of other dealing in the software.") << std::endl << std::endl
+		<< INFO("Neither the name of the copyright holder nor the names of any other contributors") << std::endl
+		<< INFO("may be used to endorse or promote products derived from this software without") << std::endl
+		<< INFO("specific prior written permission.") << std::endl << std::endl
+		<< INFO("If you are using, please cite it in your reseach. We have a DOI: ") << std::endl
+		<< INFO("Well, not yet :)") << std::endl << std::endl;
 
-	std::cout << "\nClick a button to continue!";
-	std::cin.get();
+	std::cout << INPUT("\nClick a button to continue!");
+	//std::cin.get();
+
+	M2S2::unitTest_Dyadis2S();
 
 	/*
 	Here is what we are trying to solve (notice that it is symmetric):
@@ -165,7 +170,7 @@ int main()
 	/* --------------------------------------------------------------------*/
 	phase = 11;
 	PARDISO(pt, &maxfct, &mnum, &mtype, &phase,
-		&size, mi_csrMatrix.mv_value.data(), mi_csrMatrix.mv_nz.data(), mi_csrMatrix.mv_col.data(),
+		&size, mi_csrMatrix.mv_value.data(), mi_csrMatrix.mv_rowIndex.data(), mi_csrMatrix.mv_colIndex.data(),
 		&idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
 	if (error != 0)
 	{
@@ -183,7 +188,7 @@ int main()
 	/* ----------------------------*/
 	phase = 22;
 	PARDISO(pt, &maxfct, &mnum, &mtype, &phase,
-		&size, mi_csrMatrix.mv_value.data(), mi_csrMatrix.mv_nz.data(), mi_csrMatrix.mv_col.data(),
+		&size, mi_csrMatrix.mv_value.data(), mi_csrMatrix.mv_rowIndex.data(), mi_csrMatrix.mv_colIndex.data(),
 		&idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
 	if (error != 0)
 	{
@@ -202,7 +207,7 @@ int main()
 
 	/* Set right hand side to one. */
 	PARDISO(pt, &maxfct, &mnum, &mtype, &phase,
-		&size, mi_csrMatrix.mv_value.data(), mi_csrMatrix.mv_nz.data(), mi_csrMatrix.mv_col.data(),
+		&size, mi_csrMatrix.mv_value.data(), mi_csrMatrix.mv_rowIndex.data(), mi_csrMatrix.mv_colIndex.data(),
 		&idum, &nrhs, iparm, &msglvl, mi_RHS.data(), mi_LHS.data(), &error);
 	if (error != 0)
 	{
@@ -224,7 +229,7 @@ int main()
 	/* --------------------------------------*/
 	phase = -1;           /* Release internal memory. */
 	PARDISO(pt, &maxfct, &mnum, &mtype, &phase,
-		&size, &ddum, mi_csrMatrix.mv_nz.data(), mi_csrMatrix.mv_col.data(),
+		&size, &ddum, mi_csrMatrix.mv_rowIndex.data(), mi_csrMatrix.mv_colIndex.data(),
 		&idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
 	// ------------------------------------------------------------------------------------
 

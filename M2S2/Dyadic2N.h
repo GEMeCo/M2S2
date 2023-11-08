@@ -14,15 +14,8 @@
 // ================================================================================================
 #pragma once
 
-// Standard libraries
-#include <vector>
-#include <iostream>		// required by std::cout
-#include <iomanip>		// Required by ios manipulations
-#include <sstream>		// required by std::ostringstream
-#include <cmath>		// required by std::sqrt / std::acos
-#include <cassert>		// required by assert
-
-// M2S2 libraries
+// Libraries
+#include "Common.h"
 #include "Dyadic2S.h"
 
 // ================================================================================================
@@ -211,7 +204,7 @@ namespace M2S2 {
 		  * V(1) = T(1,1); V(2) = T(2,2); V(3) = T(3,3); V(4) = T(2,3); V(5) = T(1,3); V(6) = T(1,2); V(7) = T(3,2); V(8) = T(3,1); V(9) = T(2,1)
 		  * @return a vector with tensor written in Voigt notation with mnemonics rule.
 		  */
-		std::vector<double> getVoigtMnenomics()
+		std::vector<double> getVoigtMnemonics()
 		{
 			unsigned int mi_nVoigt = 3 * mv_nDim - 3;
 			std::vector<double> result(mv_nSize);
@@ -615,7 +608,7 @@ namespace M2S2 {
 			return result;
 		}
 
-		/** @return the antisymmetric part of Tensor -> Asym(T)
+		/** @return the antisymmetric (skew) part of Tensor -> Asym(T)
 		  */
 		Dyadic2N getAsymmetric() const
 		{
@@ -629,15 +622,36 @@ namespace M2S2 {
 			return result;
 		}
 
+		/** @return the spherical part of Tensor
+		  */
+		Dyadic2S getSpheric() const
+		{
+			double mi_diag = trace() / 3.;
+
+			return Dyadic2S::identity(mv_nDim, mi_diag);
+		}
+
+		/** @return the deviator part of Tensor
+		  */
+		Dyadic2N getDeviator() const
+		{
+			double mi_diag = trace() / 3.;
+			Dyadic2N result(*this);
+			for (unsigned int i = 0; i < result.rows(); ++i) {
+				result.at(i, i) -= mi_diag;
+			}
+			return result;
+		}
+
 		/** @return the product of the transposed tensor and itself (always symmetric) -> T1^T * T1
 		  */
 		Dyadic2S getATA() const
 		{
 			Dyadic2S result(mv_nDim);
 			for (unsigned int i = 0; i < mv_nDim; ++i) {
-				for (unsigned int j = 0; j < mv_nDim; ++j) {
+				for (unsigned int j = i; j < mv_nDim; ++j) {
 					for (unsigned int k = 0; k < mv_nDim; ++k) {
-						result.at(i, j) += mv_Values.at(i * mv_nDim + k) * mv_Values.at(k * mv_nDim + j);
+						result.at(i, j) += mv_Values.at(k * mv_nDim + i) * mv_Values.at(k * mv_nDim + j);
 					}
 				}
 			}

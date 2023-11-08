@@ -19,4 +19,44 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Auxiliary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dyadic2N.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dyadic2S.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dyadic4C.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dyadic4S.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="M2S2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixSparse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnitTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

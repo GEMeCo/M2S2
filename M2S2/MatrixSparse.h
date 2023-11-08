@@ -16,6 +16,7 @@
 #define _SPARSESET_
 
 // M2S2 libraries
+#include "Common.h"
 #include "Auxiliary.h"
 #include "MatrixS.h"
 #include "MatrixX.h"
@@ -79,51 +80,26 @@ namespace M2S2 {
             return output;
         }
 
-        /** Prepare a string to print (to file or screen)
+        /** Print the non-zero values of the sparse matrix
           * @param precision Number of decimal digits after the decimal point (default is 4)
           * @param width Minimum number of characters to be written (default is 8)
           */
         const std::string print(const int precision = 4, const int width = 8) const
         {
             std::ostringstream output;
-            unsigned int index;
-
-            output << std::endl << "ATTENTION  : IMPOSE AddEqualTerms() BEFORE PRINTING! It is not going to work otherwise!" << std::endl;
-            if (mv_type == 'C') output << "ATTENTION  : COLUMN MAJOR MATRIX - PRINTING TRANSPOSED!" << std::endl;
-            if (mv_sym) output << std::endl << "ATTENTION  : ONLY HALF WILL BE PRINTED! The rest is going to appear Zero!";
             output << std::endl << std::fixed;
 
+            // Print non-zero values
             for (unsigned int i = 0; i < mv_line.size(); i++) {
-                assert(mv_line.at(i).mv_assembled); // Only assembled after AddEqualTerms()
-            }
-
-            // Begin printing non-zero values
-            for (unsigned int i = 0; i < mv_line.size(); i++) {
-                output << "L:" << i << " ";
-                for (unsigned int j = 0; j < mv_line.at(i).mv_index.size(); j++) {
-                    output << mv_line.at(i).mv_index.at(j) << ":" << mv_line.at(i).mv_value.at(j) << " ";
-                }
-            }
-
-            // Then, print the matrix
-            output << std::endl << std::endl;
-            for (unsigned int i = 0; i < mv_line.size(); i++) {
-                index = 0;
+                if (mv_line.at(i).mv_assembled) output << "Assembled Line: " << i << " ";
+                else output << "Non assembled Line: " << i << " ";
 
                 for (unsigned int j = 0; j < mv_line.at(i).mv_index.size(); j++) {
-                    while (mv_line.at(i).mv_index.at(j) != index) {
-                        output << std::setprecision(0) << mg_zero << " ";
-                        index++;
-                    }
-                    output << std::setw(width) << std::setprecision(precision) << mv_line.at(i).mv_value.at(j) << " ";
-                    index++;
-                }
-                for (unsigned int j = index; j < mv_line.size(); j++) {
-                    output << std::setprecision(0) << mg_zero << " ";
+                    output << mv_line.at(i).mv_index.at(j) << " : "
+                        << std::setw(width) << std::setprecision(precision) << mv_line.at(i).mv_value.at(j) << " ";
                 }
                 output << std::endl;
             }
-
             output << std::endl;
             return output.str();
         }
@@ -180,7 +156,7 @@ namespace M2S2 {
             }
         }
 
-        /** Save current sparse matrix in CSR format. Notice that this will destroy current matrix
+        /** Save current sparse matrix in CSR format. Notice that this will destroy current CSR matrix.
           * @param other sparse matrix in CSR format.
           */
         void saveAsCSR(M2S2::CSR& other)
@@ -201,27 +177,28 @@ namespace M2S2 {
                 // Compute number of itens in CSR
                 int nnz = 0;
                 other.mv_sym = mv_sym;
-                other.mv_size = mv_line.size();
-                other.mv_nz.reserve(mv_line.size() + 1);
+                other.mv_rows = mv_line.size();
+                other.mv_cols = mv_line.size();
+                other.mv_rowIndex.reserve(mv_line.size() + 1);
                 // nnz -> number of the first component in line
                 for (int i = 0; i < mv_line.size(); ++i) {
-                    other.mv_nz.push_back(nnz);
+                    other.mv_rowIndex.push_back(nnz);
                     nnz += mv_line.at(i).mv_index.size();
                 }
-                other.mv_nz.push_back(nnz);
-                other.mv_col.reserve(nnz);
+                other.mv_rowIndex.push_back(nnz);
+                other.mv_colIndex.reserve(nnz);
                 other.mv_value.reserve(nnz);
                 // copy terms
                 for (int i = 0; i < mv_line.size(); ++i) {
                     for (int j = 0; j < mv_line.at(i).mv_index.size(); ++j) {
-                        other.mv_col.push_back(mv_line.at(i).mv_index.at(j));
+                        other.mv_colIndex.push_back(mv_line.at(i).mv_index.at(j));
                         other.mv_value.push_back(mv_line.at(i).mv_value.at(j));
                     }
                 }
             }
         }
 
-        /** Save current sparse matrix in CSC format. Notice that this will destroy current matrix
+        /** Save current sparse matrix in CSC format. Notice that this will destroy current CSC matrix.
           * @param other sparse matrix in CSC format.
           */
         void saveAsCSC(M2S2::CSC& other)
@@ -242,20 +219,21 @@ namespace M2S2 {
                 // Compute number of itens in CSR
                 int nnz = 0;
                 other.mv_sym = mv_sym;
-                other.mv_size = mv_line.size();
-                other.mv_nz.reserve(mv_line.size() + 1);
+                other.mv_rows = mv_line.size();
+                other.mv_cols = mv_line.size();
+                other.mv_colIndex.reserve(mv_line.size() + 1);
                 // nnz -> number of the first component in line
                 for (int i = 0; i < mv_line.size(); ++i) {
-                    other.mv_nz.push_back(nnz);
+                    other.mv_colIndex.push_back(nnz);
                     nnz += mv_line.at(i).mv_index.size();
                 }
-                other.mv_nz.push_back(nnz);
-                other.mv_row.reserve(nnz);
+                other.mv_colIndex.push_back(nnz);
+                other.mv_rowIndex.reserve(nnz);
                 other.mv_value.reserve(nnz);
                 // copy terms
                 for (int i = 0; i < mv_line.size(); ++i) {
                     for (int j = 0; j < mv_line.at(i).mv_index.size(); ++j) {
-                        other.mv_row.push_back(mv_line.at(i).mv_index.at(j));
+                        other.mv_rowIndex.push_back(mv_line.at(i).mv_index.at(j));
                         other.mv_value.push_back(mv_line.at(i).mv_value.at(j));
                     }
                 }
@@ -309,10 +287,12 @@ namespace M2S2 {
         /** If there are terms with repeated index, these are summed
           */
         void addEqualTerms() {
+            bool mi_assembled;
             for (int i = 0; i < mv_line.size(); i++) {
                 /* NOW sortLine IS CALLED INSIDE addEqualTerms*/
                 /* sort(); */
-                mv_line.at(i).addEqualTerms();
+                mi_assembled = mv_line.at(i).addEqualTerms();
+                assert(mi_assembled); // ERROR: Probably, a line is empty!
             }
         }
 

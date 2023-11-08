@@ -14,14 +14,8 @@
 // ================================================================================================
 #pragma once
 
-// Standard libraries
-#include <vector>
-#include <utility>      // std::move
-#include <algorithm>    // std::copy() and std::assign()
-#include <iostream>		// std::cout
-#include <iomanip>		// Required by ios manipulations (std::setprecision)
-#include <sstream>		// std::ostringstream
-#include <cassert>      // assert
+// Libraries
+#include "Common.h"
 
 namespace M2S2 {
     /** @class triplet
@@ -80,7 +74,7 @@ namespace M2S2 {
 
     /** @class CSR
       * @brief CSR stands for Compressed Sparse Row, a Sparse BLAS format for matrices.
-      * @details These CSR class was created only to output data. All operations must be performed in sparseMatrix class.
+      * @details This CSR class was created only to use in Sparse packages. All operations must be performed in sparseMatrix class.
       */
     class CSR {
     public:
@@ -88,7 +82,8 @@ namespace M2S2 {
           */
         CSR() {
             mv_sym = false;
-            mv_size = 0;
+            mv_rows = 0;
+            mv_cols = 0;
         }
 
         /** Copy constructor for M2S2 CSR.
@@ -96,10 +91,11 @@ namespace M2S2 {
           */
         CSR(const CSR& other) {
             mv_sym = other.mv_sym;
-            mv_size = other.mv_size;
+            mv_rows = other.mv_rows;
+            mv_cols = other.mv_cols;
 
-            mv_nz.assign(other.mv_nz.begin(), other.mv_nz.end());
-            mv_col.assign(other.mv_col.begin(), other.mv_col.end());
+            mv_rowIndex.assign(other.mv_rowIndex.begin(), other.mv_rowIndex.end());
+            mv_colIndex.assign(other.mv_colIndex.begin(), other.mv_colIndex.end());
             mv_value.assign(other.mv_value.begin(), other.mv_value.end());
         }
 
@@ -107,7 +103,7 @@ namespace M2S2 {
           * @param other CSR to be moved.
           */
         CSR(CSR&& other) noexcept 
-            : mv_sym(other.mv_sym), mv_size(other.mv_size), mv_nz(other.mv_nz), mv_col(other.mv_col), mv_value(other.mv_value) { }
+            : mv_sym(other.mv_sym), mv_rows(other.mv_rows), mv_cols(other.mv_cols), mv_rowIndex(other.mv_rowIndex), mv_colIndex(other.mv_colIndex), mv_value(other.mv_value) { }
 
         /** Destructor.
           */
@@ -118,25 +114,148 @@ namespace M2S2 {
         void destroy()
         {
             mv_sym = false;
-            mv_size = 0;
+            mv_rows = 0;
+            mv_cols = 0;
 
-            std::vector<int>().swap(mv_nz);
-            std::vector<int>().swap(mv_col);
+            std::vector<int>().swap(mv_rowIndex);
+            std::vector<int>().swap(mv_colIndex);
             std::vector<double>().swap(mv_value);
+        }
+
+        /** Overloads operator << to stream the matrix. */
+        friend std::ostream& operator<<(std::ostream& output, const CSR& matrix)
+        {
+            output << matrix.print();
+            return output;
+        }
+
+        /** Prepare a string to print (to file or screen)
+          * @param precision Number of decimal digits after the decimal point (default is 3)
+          * @param width Minimum number of characters to be written (default is 7)
+          */
+        const std::string print(const int precision = 3, const int width = 7) const
+        {
+            std::ostringstream output;
+            unsigned int vecIndex;
+            unsigned int rowStart;
+            unsigned int rowEnd;
+
+            output << std::endl;
+            if (mv_sym) output << WARN("Printing only the symmetric part - the rest is filled by zeros!");
+
+            for (unsigned int i = 0; i < mv_rows; ++i) {
+                rowStart = mv_rowIndex.at(i);
+                rowEnd = mv_rowIndex.at(i + 1) - 1;
+                vecIndex = rowStart;
+
+                for (unsigned int j = 0; j < mv_cols; ++j) {
+                    if (j != mv_colIndex.at(vecIndex)) {
+                        output << std::setw(width) << std::setprecision(precision) << mg_zero << " ";
+                    }
+                    else {
+                        output << std::setw(width) << std::setprecision(precision) << mv_value.at(vecIndex) << " ";
+                        if (vecIndex != rowEnd) ++vecIndex;
+                    }
+                }
+                output << std::endl;
+            }
+            output << std::endl;
+            return output.str();
+        }
+
+        /** Save current CSR sparse matrix as MatrixS.
+          * @param other Dense symmetric matrix.
+          */
+        void saveAsMatrixS(M2S2::MatrixS& other) {
+            assert(mv_sym); // Cannot save an asymmetric sparse matrix as a symmetric matrix!
+
+            other.resize(mv_rows);
+            other.clear();
+
+            unsigned int vecIndex;
+            unsigned int rowStart;
+            unsigned int rowEnd;
+
+            for (unsigned int i = 0; i < mv_rows; ++i) {
+                rowStart = mv_rowIndex.at(i);
+                rowEnd = mv_rowIndex.at(i + 1) - 1;
+                vecIndex = rowStart;
+
+                for (unsigned int j = 0; j < mv_cols; ++j) {
+                    if (j == mv_colIndex.at(vecIndex)) {
+                        other.at(i, j) = mv_value.at(vecIndex);
+
+                        if (vecIndex != rowEnd) {
+                            ++vecIndex;
+                        }
+                    }
+                }
+            }
+        }
+
+        /** Save current CSR sparse matrix as MatrixX.
+          * @param other Dense asymmetric matrix.
+          */
+        void saveAsMatrixX(M2S2::MatrixX& other) {
+            other.resize(mv_rows, mv_cols);
+            other.clear();
+
+            unsigned int vecIndex;
+            unsigned int rowStart;
+            unsigned int rowEnd;
+
+            if(mv_sym) {
+                for (unsigned int i = 0; i < mv_rows; ++i) {
+                    rowStart = mv_rowIndex.at(i);
+                    rowEnd = mv_rowIndex.at(i + 1) - 1;
+                    vecIndex = rowStart;
+
+                    for (unsigned int j = 0; j < mv_cols; ++j) {
+                        if (j == mv_colIndex.at(vecIndex)) {
+                            other.at(i, j) = mv_value.at(vecIndex);
+                            other.at(j, i) = mv_value.at(vecIndex);
+
+                            if (vecIndex != rowEnd) {
+                                ++vecIndex;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                for (unsigned int i = 0; i < mv_rows; ++i) {
+                    rowStart = mv_rowIndex.at(i);
+                    rowEnd = mv_rowIndex.at(i + 1) - 1;
+                    vecIndex = rowStart;
+
+                    for (unsigned int j = 0; j < mv_cols; ++j) {
+                        if (j == mv_colIndex.at(vecIndex)) {
+                            other.at(i, j) = mv_value.at(vecIndex);
+
+                            if (vecIndex != rowEnd) {
+                                ++vecIndex;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
     public:
         /** @brief If not symmetric, sym = false */
         bool mv_sym = false;
 
-        /** @brief Number of rows / columns */
-        int mv_size;
+        /** @brief Number of rows */
+        int mv_rows;
 
-        /** @brief nz[i] - start of line i; nz[i+1] - end of line i. */
-        std::vector<int> mv_nz;
+        /** @brief Number of columns */
+        int mv_cols;
+
+        /** @brief rowIndex[i] - start of line i; rowIndex[i+1] - end of line i. */
+        std::vector<int> mv_rowIndex;
 
         /** @brief Column index. */
-        std::vector<int> mv_col;
+        std::vector<int> mv_colIndex;
 
         /** @brief Value of the matrix elements. */
         std::vector<double> mv_value;
@@ -153,7 +272,8 @@ namespace M2S2 {
           */
         CSC() {
             mv_sym = false;
-            mv_size = 0;
+            mv_rows = 0;
+            mv_cols = 0;
         }
 
         /** Copy constructor for M2S2 CSC.
@@ -161,10 +281,11 @@ namespace M2S2 {
           */
         CSC(const CSC& other) {
             mv_sym = other.mv_sym;
-            mv_size = other.mv_size;
+            mv_rows = other.mv_rows;
+            mv_cols = other.mv_cols;
 
-            mv_nz.assign(other.mv_nz.begin(), other.mv_nz.end());
-            mv_row.assign(other.mv_row.begin(), other.mv_row.end());
+            mv_colIndex.assign(other.mv_colIndex.begin(), other.mv_colIndex.end());
+            mv_rowIndex.assign(other.mv_rowIndex.begin(), other.mv_rowIndex.end());
             mv_value.assign(other.mv_value.begin(), other.mv_value.end());
         }
 
@@ -172,7 +293,7 @@ namespace M2S2 {
           * @param other CSC to be moved.
           */
         CSC(CSC&& other) noexcept
-            : mv_sym(other.mv_sym), mv_size(other.mv_size), mv_nz(other.mv_nz), mv_row(other.mv_row), mv_value(other.mv_value) { }
+            : mv_sym(other.mv_sym), mv_rows(other.mv_rows), mv_cols(other.mv_cols), mv_colIndex(other.mv_colIndex), mv_rowIndex(other.mv_rowIndex), mv_value(other.mv_value) { }
 
         /** Destructor.
           */
@@ -183,29 +304,159 @@ namespace M2S2 {
         void destroy()
         {
             mv_sym = false;
-            mv_size = 0;
+            mv_rows = 0;
+            mv_cols = 0;
 
-            std::vector<int>().swap(mv_nz);
-            std::vector<int>().swap(mv_row);
+            std::vector<int>().swap(mv_colIndex);
+            std::vector<int>().swap(mv_rowIndex);
             std::vector<double>().swap(mv_value);
 
-            mv_nz.clear();
-            mv_row.clear();
+            mv_colIndex.clear();
+            mv_rowIndex.clear();
             mv_value.clear();
+        }
+
+        /** Overloads operator << to stream the matrix. */
+        friend std::ostream& operator<<(std::ostream& output, const CSC& matrix)
+        {
+            output << matrix.print();
+            return output;
+        }
+
+        /** Prepare a string to print (to file or screen)
+          * @param precision Number of decimal digits after the decimal point (default is 3)
+          * @param width Minimum number of characters to be written (default is 7)
+          */
+        const std::string print(const int precision = 3, const int width = 7) const
+        {
+            std::ostringstream output;
+            int vecIndex;
+            unsigned int colStart;
+            unsigned int colEnd;
+
+            output << std::endl;
+            if (mv_sym) output << WARN("Printing only the symmetric part - the rest is filled by zeros!");
+
+            for (unsigned int i = 0; i < mv_rows; ++i) {
+                for (unsigned int j = 0; j < mv_cols; ++j) {
+                    vecIndex = -1;
+                    colStart = mv_colIndex.at(j);
+                    colEnd = mv_colIndex.at(j + 1);
+
+                    for (unsigned int k = colStart; k < colEnd; ++k) {
+                        if (mv_rowIndex.at(k) == i) {
+                            vecIndex = k;
+                            break;
+                        }
+                        if (mv_rowIndex.at(k) > i) break;
+                    }
+                    if (vecIndex != -1) {
+                        output << std::setw(width) << std::setprecision(precision) << mv_value.at(vecIndex) << " ";
+                    }
+                    else {
+                        output << std::setw(width) << std::setprecision(precision) << mg_zero << " ";
+                    }
+                }
+                output << std::endl;
+            }
+            output << std::endl;
+            return output.str();
+        }
+
+        /** Save current CSC sparse matrix as MatrixS.
+          * @param other Dense symmetric matrix.
+          */
+        void saveAsMatrixS(M2S2::MatrixS& other) {
+            assert(mv_sym); // Cannot save an asymmetric sparse matrix as a symmetric matrix!
+
+            other.resize(mv_cols);
+            other.clear();
+
+            unsigned int vecIndex;
+            unsigned int colStart;
+            unsigned int colEnd;
+
+            for (unsigned int i = 0; i < mv_cols; ++i) {
+                colStart = mv_colIndex.at(i);
+                colEnd   = mv_colIndex.at(i + 1) - 1;
+                vecIndex = colStart;
+
+                for (unsigned int j = 0; j < mv_rows; ++j) {
+                    if (j == mv_rowIndex.at(vecIndex)) {
+                        other.at(j, i) = mv_value.at(vecIndex);
+
+                        if (vecIndex != colEnd) {
+                            ++vecIndex;
+                        }
+                    }
+                }
+            }
+        }
+
+        /** Save current CSC sparse matrix as MatrixX.
+          * @param other Dense asymmetric matrix.
+          */
+        void saveAsMatrixX(M2S2::MatrixX& other) {
+            other.resize(mv_rows, mv_cols);
+            other.clear();
+
+            unsigned int vecIndex;
+            unsigned int colStart;
+            unsigned int colEnd;
+
+            if (mv_sym) {
+                for (unsigned int i = 0; i < mv_cols; ++i) {
+                    colStart = mv_colIndex.at(i);
+                    colEnd = mv_colIndex.at(i + 1) - 1;
+                    vecIndex = colStart;
+
+                    for (unsigned int j = 0; j < mv_rows; ++j) {
+                        if (j == mv_rowIndex.at(vecIndex)) {
+                            other.at(j, i) = mv_value.at(vecIndex);
+                            other.at(i, j) = mv_value.at(vecIndex);
+
+                            if (vecIndex != colEnd) {
+                                ++vecIndex;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                for (unsigned int i = 0; i < mv_cols; ++i) {
+                    colStart = mv_colIndex.at(i);
+                    colEnd = mv_colIndex.at(i + 1) - 1;
+                    vecIndex = colStart;
+
+                    for (unsigned int j = 0; j < mv_rows; ++j) {
+                        if (j == mv_rowIndex.at(vecIndex)) {
+                            other.at(j, i) = mv_value.at(vecIndex);
+                            other.at(i, j) = mv_value.at(vecIndex);
+
+                            if (vecIndex != colEnd) {
+                                ++vecIndex;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
     public:
         /** @brief If not symmetric, sym = false */
         bool mv_sym = false;
 
-        /** @brief Number of rows / columns */
-        int mv_size;
+        /** @brief Number of rows */
+        int mv_rows;
 
-        /** @brief nz[i] - start of line i; nz[i+1] - end of line i. */
-        std::vector<int> mv_nz;
+        /** @brief Number of columns */
+        int mv_cols;
+
+        /** @brief colIndex[i] - start of line i; colIndex[i+1] - end of line i. */
+        std::vector<int> mv_colIndex;
 
         /** @brief Row index. */
-        std::vector<int> mv_row;
+        std::vector<int> mv_rowIndex;
 
         /** @brief Value of the matrix elements. */
         std::vector<double> mv_value;
@@ -400,7 +651,7 @@ namespace M2S2 {
 
         /** If there are terms with repeated index, these are summed
           */
-        void addEqualTerms() {
+        bool addEqualTerms() {
             if (mv_index.size() && !mv_assembled) {
                 sort();
                 /* Adding equal terms will only work if line is alredy sorted */
@@ -418,6 +669,7 @@ namespace M2S2 {
                 mv_value.resize(pos); /* new size, but keeping memory (reserve) */
                 mv_assembled = true;
             }
+            return mv_assembled;
         }
 
         /** @return the position in line of index. If index is not found return -1.
@@ -549,7 +801,7 @@ namespace M2S2 {
                 if (!mv_assembled) addEqualTerms();
                 if ((mv_index.at(0) > index) || (mv_index.at(mv_index.size() - 1) < index))
                     return -1;
-                for (int i = 0; i < mv_index.size(); i++) {
+                for (int i = 0; i < mv_index.size(); ++i) {
                     if (index == mv_index.at(i))
                         return i;
                     else if (index < mv_index.at(i))

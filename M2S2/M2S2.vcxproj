@@ -91,6 +91,22 @@
   <ItemGroup>
     <ClCompile Include="M2S2.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Auxiliary.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="Dyadic2N.h" />
+    <ClInclude Include="Dyadic2S.h" />
+    <ClInclude Include="Dyadic4C.h" />
+    <ClInclude Include="Dyadic4S.h" />
+    <ClInclude Include="M2S2.h" />
+    <ClInclude Include="MatrixS.h" />
+    <ClInclude Include="MatrixSparse.h" />
+    <ClInclude Include="MatrixX.h" />
+    <ClInclude Include="UnitTest.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

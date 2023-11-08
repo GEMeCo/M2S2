@@ -14,19 +14,10 @@
 // ================================================================================================
 #pragma once
 
-// Standard libraries
-#include <vector>
-#include <iostream>		// required by std::cout
-#include <iomanip>		// Required by ios manipulations
-#include <sstream>		// required by std::ostringstream
-#include <cmath>		// required by std::sqrt / std::acos
-#include <cassert>		// required by assert
-
-// M2S2 libraries
+// Libraries
+#include "Common.h"
 #include "Dyadic2S.h"
 #include "Dyadic2N.h"
-
-constexpr double mg_zero = 0.;
 
 // ================================================================================================
 //
@@ -177,9 +168,15 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline double& at(unsigned int i, unsigned int j) {
-			if (i < mv_nDim && j < mv_nDim) { return mv_Values.at(i + j + bool(i * j)); }
-			else if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
-			else { return mv_trash; }
+			if (i < mv_nDim && j < mv_nDim) {
+				unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+				return mv_Values.at(pos);
+			}
+			else if (i < mv_nVoigt && j < mv_nVoigt) {
+				if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
+				else { return mv_trash; }
+			}
+			else throw std::runtime_error(ERROR("ERROR: Unable to access required element!"));
 		}
 
 		/** Access specified element - returns Tensor_ij (in Voigt notation)
@@ -187,9 +184,15 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline const double& at(unsigned int i, unsigned int j) const {
-			if (i < mv_nDim && j < mv_nDim) { return mv_Values.at(i + j + bool(i * j)); }
-			else if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
-			else { return mg_zero; }
+			if (i < mv_nDim && j < mv_nDim) {
+				unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+				return mv_Values.at(pos);
+			}
+			else if (i < mv_nVoigt && j < mv_nVoigt) {
+				if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
+				else { return mg_zero; }
+			}
+			else throw std::runtime_error(ERROR("ERROR: Unable to access required element!"));
 		}
 
 		/** Access specified element - returns Tensor_ij (in Voigt notation)
@@ -197,9 +200,15 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline double& operator()(unsigned int i, unsigned int j) {
-			if (i < mv_nDim && j < mv_nDim) { return mv_Values.at(i + j + bool(i * j)); }
-			else if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
-			else { return mv_trash; }
+			if (i < mv_nDim && j < mv_nDim) {
+				unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+				return mv_Values.at(pos);
+			}
+			else if (i < mv_nVoigt && j < mv_nVoigt) {
+				if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
+				else { return mv_trash; }
+			}
+			else throw std::runtime_error(ERROR("ERROR: Unable to access required element!"));
 		}
 
 		/** Access specified element - returns Tensor_ij (in Voigt notation)
@@ -207,9 +216,15 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline const double& operator()(unsigned int i, unsigned int j) const {
-			if (i < mv_nDim && j < mv_nDim) { return mv_Values.at(i + j + bool(i * j)); }
-			else if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
-			else { return mg_zero; }
+			if (i < mv_nDim && j < mv_nDim) {
+				unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
+				return mv_Values.at(pos);
+			}
+			else if (i < mv_nVoigt && j < mv_nVoigt) {
+				if (i == j) { return mv_Values.at(mv_nVoigt - mv_nDim + i); }
+				else { return mg_zero; }
+			}
+			else throw std::runtime_error(ERROR("ERROR: Unable to access required element!"));
 		}
 
 		/** @return the row size.
