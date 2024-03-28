@@ -63,10 +63,10 @@ namespace M2S2 {
 		  */
 		Dyadic2N(const std::vector<double>& value)
 		{
+			if (value.size() != 4 && value.size() != 9) throw std::invalid_argument(ERROR("Invalid argument on Dyadic2N constructor: Size of input vector is not from 2D or 3D spaces!"));
+
 			mv_nDim = (int)(std::sqrt(value.size()));
 			mv_nSize = mv_nDim * mv_nDim;
-
-			assert(mv_nDim == 2 || mv_nDim == 3);	// Size of input vector is not from 2D or 3D
 			mv_Values = { value.begin(), value.begin() + mv_nSize };
 		}
 
@@ -82,7 +82,10 @@ namespace M2S2 {
 		/** Move constructor for asymmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param other Dyadic to be moved.
 		  */
-		Dyadic2N(Dyadic2N&& other) noexcept : mv_nDim(other.mv_nDim), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) { }
+		Dyadic2N(Dyadic2N&& other) noexcept : mv_nDim(other.mv_nDim), mv_nSize(other.mv_nSize), mv_Values(std::move(other.mv_Values)) {
+			other.mv_nDim = 0;
+			other.mv_nSize = 0;
+		}
 
 		/** Destructor.
 		  */
@@ -111,8 +114,10 @@ namespace M2S2 {
 		/** Overloads operator >> to stream the dyadic. */
 		friend std::istream& operator>>(std::istream& input, Dyadic2N& tensor)
 		{
+			if (tensor.size() == 0) throw std::out_of_range(ERROR("Out of range in stream operator >>: Unable to fill the Dyadic!"));
 			for (unsigned int i = 0; i < tensor.rows(); i++) {
 				for (unsigned int j = 0; j < tensor.cols(); j++) {
+					if (input.eof()) throw std::length_error(ERROR("Length error in stream operator >>: Unable to fill the Dyadic!"));
 					input >> tensor.at(i, j);
 				}
 			}
@@ -160,25 +165,49 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& at(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nDim + j); }
+		inline double& at(unsigned int i, unsigned int j) {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+
+			unsigned int pos = i * mv_nDim + j;
+			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
+			return mv_Values.at(pos);
+		}
 
 		/** Access specified element - returns Tensor_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& at(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nDim + j); }
+		inline const double& at(unsigned int i, unsigned int j) const {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+
+			unsigned int pos = i * mv_nDim + j;
+			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
+			return mv_Values.at(pos);
+		}
 
 		/** Access specified element - returns Tensor_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& operator()(unsigned int i, unsigned int j) { return mv_Values.at(i * mv_nDim + j); }
+		inline double& operator()(unsigned int i, unsigned int j) {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+
+			unsigned int pos = i * mv_nDim + j;
+			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
+			return mv_Values.at(pos);
+		}
 
 		/** Access specified element - returns Tensor_ij
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& operator()(unsigned int i, unsigned int j) const { return mv_Values.at(i * mv_nDim + j); }
+		inline const double& operator()(unsigned int i, unsigned int j) const {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+
+			unsigned int pos = i * mv_nDim + j;
+			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
+			return mv_Values.at(pos);
+		}
 
 		/** @return the row size.
 		  */
@@ -200,12 +229,13 @@ namespace M2S2 {
 		  */
 		const std::vector<double>& getVector() const { return mv_Values; }
 
-		/** Returns a vector with tensor written in Voigt notation with mnemonics rule: 
+		/** @return current tensor written as vector in Voigt notation with mnemonics rule.
 		  * V(1) = T(1,1); V(2) = T(2,2); V(3) = T(3,3); V(4) = T(2,3); V(5) = T(1,3); V(6) = T(1,2); V(7) = T(3,2); V(8) = T(3,1); V(9) = T(2,1)
-		  * @return a vector with tensor written in Voigt notation with mnemonics rule.
 		  */
 		std::vector<double> getVoigtMnemonics()
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .getVoigtMnemonics: Empty tensor!"));
+
 			unsigned int mi_nVoigt = 3 * mv_nDim - 3;
 			std::vector<double> result(mv_nSize);
 			for (unsigned int i = 0; i < mv_nDim; i++) {
@@ -259,6 +289,62 @@ namespace M2S2 {
 				other.mv_nSize = 0;
 			}
 			return *this;
+		}
+
+		/** Overloads operator == for comparison operations
+		  * @param other Dyadic to be compared.
+		  */
+		bool operator==(const Dyadic2N& other)
+		{
+			bool mi_check = true;
+			if (mv_nDim == other.mv_nDim && mv_nSize == other.mv_nSize) {
+				for (int i = 0; i < mv_nSize; ++i) {
+					if (!almost_equal(mv_Values.at(i), other.mv_Values.at(i))) {
+						mi_check = false;
+						break;
+					}
+				}
+				return mi_check;
+			}
+			return false;
+		}
+
+		/** Overloads operator == for comparison operations
+		  * @param other Dyadic to be compared.
+		  */
+		bool operator==(const Dyadic2S& other)
+		{
+			bool mi_check = true;
+			if (rows() == other.rows() && cols() == other.cols()) {
+				for (int i = 0; i < rows(); ++i) {
+					for (int j = 0; j < cols(); ++j) {
+						if (!almost_equal(at(i, j), other.at(i, j))) {
+							mi_check = false;
+							break;
+						}
+					}
+				}
+				return mi_check;
+			}
+			return false;
+		}
+
+		/** Overloads operator != for comparison operations
+		  * @param other Dyadic to be compared.
+		  */
+		bool operator!=(const Dyadic2N& other)
+		{
+			if (*this == other) return false;
+			return true;
+		}
+
+		/** Overloads operator != for comparison operations
+		  * @param other Dyadic to be compared.
+		  */
+		bool operator!=(const Dyadic2S& other)
+		{
+			if (*this == other) return false;
+			return true;
 		}
 
 		/** Overloads operator += for cumulative addition -> T += O -> T = T + O
@@ -348,17 +434,18 @@ namespace M2S2 {
 			return result;
 		}
 
-		/** Overloads operator * for Dot product -> V_i = T_ij * R_j
-		  * @param R Vector to be multiplied with.
+		/** Overloads operator * for Dot product -> V_i = T_ij * Vo_j
+		  * @param vec Vector to be multiplied with.
 		  * @return a vector with the inner product.
 		  */
-		std::vector<double> operator*(const std::vector<double>& R)
+		std::vector<double> operator*(const std::vector<double>& vec)
 		{
-			assert(R.size() == mv_nDim);		// Order of tensor and vector differ
+			assert(vec.size() == mv_nDim);		// Order of tensor and vector differ
+
 			std::vector<double> result(mv_nDim);
 			for (unsigned int i = 0; i < mv_nDim; i++) {
 				for (unsigned int j = 0; j < mv_nDim; j++) {
-					result.at(i) += at(i, j) * R.at(j);
+					result.at(i) += at(i, j) * vec.at(j);
 				}
 			}
 			return result;
@@ -410,7 +497,7 @@ namespace M2S2 {
 		Dyadic2N operator/(const double& alfa) const
 		{
 			if ((int)(alfa * 100000) == 0) {
-				throw std::invalid_argument("\nDivision by zero!\n");
+				throw std::invalid_argument(ERROR("Invalid argument in Dyadic2N division operator: Division by zero!"));
 			}
 
 			Dyadic2N result(*this);
@@ -463,7 +550,7 @@ namespace M2S2 {
 		Dyadic2N& operator/=(const double& alfa)
 		{
 			if ((int)(alfa * 100000) == 0) {
-				throw std::invalid_argument("\nDivision by zero!\n");
+				throw std::invalid_argument(ERROR("Invalid argument in Dyadic2N division operator: Division by zero!"));
 			}
 
 			for (unsigned int i = 0; i < mv_nSize; i++) {
@@ -476,6 +563,8 @@ namespace M2S2 {
 		  */
 		double determinant() const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .determinant: Empty tensor!"));
+
 			if (mv_nDim == 2) {
 				return mv_Values.at(0) * mv_Values.at(3) - mv_Values.at(1) * mv_Values.at(2);
 			}
@@ -489,10 +578,12 @@ namespace M2S2 {
 			}
 		}
 
-		/** @return the norm of the dyadic -> square root of T:T
+		/** @return the Frobenius norm of the dyadic, the square root of the sum of absolute square of all components -> square root of T:T.
 		  */
 		double norm() const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .norm: Empty tensor!"));
+
 			return std::sqrt(contraction(*this));
 		}
 
@@ -500,6 +591,8 @@ namespace M2S2 {
 		  */
 		double trace() const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .trace: Empty tensor!"));
+
 			double result = 0;
 			for (unsigned int i = 0; i < mv_nDim; ++i) {
 				result += at(i, i);
@@ -511,7 +604,9 @@ namespace M2S2 {
 		  */
 		std::vector<double> eigenvalues() const
 		{
-			std::cout << "\n\nWARNING: Eigenvalues of symmetric part only.\nOnly those will be always real." << std::endl << std::endl;
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .eigenvalues: Empty tensor!"));
+
+			std::cout << WARN("Eigenvalues of symmetric part only.\tOnly those will be always real.");
 			auto TS = getSymmetric();
 			std::vector<double> result = TS.eigenvalues();
 			return result;
@@ -521,6 +616,8 @@ namespace M2S2 {
 		  */
 		std::vector<double> invariants() const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .invariants: Empty tensor!"));
+
 			std::vector<double> result(mv_nDim);
 			if (mv_nDim == 2) {
 				result.at(0) = trace();
@@ -539,6 +636,8 @@ namespace M2S2 {
 		  */
 		Dyadic2N transpose() const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .transpose: Empty tensor!"));
+
 			Dyadic2N result(*this);
 			for (unsigned int i = 0; i < mv_nDim; ++i) {
 				for (unsigned int j = i + 1; j < mv_nDim; ++j) {
@@ -553,10 +652,12 @@ namespace M2S2 {
 		  */
 		Dyadic2N inverse() const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .invariants: Empty tensor!"));
+
 			Dyadic2N result(mv_nDim);
 			double det = determinant();
 			if ((int)(det * 100000) == 0) {
-				throw std::invalid_argument("\nTensor is singular!\n");
+				throw std::invalid_argument(ERROR("Invalid argument in Dyadic2N method .inverse: Tensor is singular!"));
 			}
 			det = 1. / det;
 
@@ -588,6 +689,8 @@ namespace M2S2 {
 		  */
 		Dyadic2S getSymmetric() const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .getSymmetric: Empty tensor!"));
+
 			Dyadic2S result(mv_nDim);
 			auto& values = result.getVector();
 
@@ -622,6 +725,23 @@ namespace M2S2 {
 			return result;
 		}
 
+		/** @return the product of the transposed tensor and itself (always symmetric) -> T1^T * T1
+		  */
+		Dyadic2S getATA() const
+		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .getATA: Empty tensor!"));
+
+			Dyadic2S result(mv_nDim);
+			for (unsigned int i = 0; i < mv_nDim; ++i) {
+				for (unsigned int j = i; j < mv_nDim; ++j) {
+					for (unsigned int k = 0; k < mv_nDim; ++k) {
+						result.at(i, j) += mv_Values.at(k * mv_nDim + i) * mv_Values.at(k * mv_nDim + j);
+					}
+				}
+			}
+			return result;
+		}
+
 		/** @return the spherical part of Tensor
 		  */
 		Dyadic2S getSpheric() const
@@ -639,21 +759,6 @@ namespace M2S2 {
 			Dyadic2N result(*this);
 			for (unsigned int i = 0; i < result.rows(); ++i) {
 				result.at(i, i) -= mi_diag;
-			}
-			return result;
-		}
-
-		/** @return the product of the transposed tensor and itself (always symmetric) -> T1^T * T1
-		  */
-		Dyadic2S getATA() const
-		{
-			Dyadic2S result(mv_nDim);
-			for (unsigned int i = 0; i < mv_nDim; ++i) {
-				for (unsigned int j = i; j < mv_nDim; ++j) {
-					for (unsigned int k = 0; k < mv_nDim; ++k) {
-						result.at(i, j) += mv_Values.at(k * mv_nDim + i) * mv_Values.at(k * mv_nDim + j);
-					}
-				}
 			}
 			return result;
 		}
@@ -678,6 +783,7 @@ namespace M2S2 {
 
 		inline void check_order(const Dyadic2N& other) const
 		{
+			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .check_order: Empty tensor!"));
 			assert(mv_nDim == other.mv_nDim);	// Order of tensors differ
 		}
 	};

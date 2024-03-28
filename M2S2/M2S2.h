@@ -118,10 +118,10 @@ namespace M2S2 {
 	{
 		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
 
-		Dyadic2N result(second.rows());
-		for (unsigned int i = 0; i < result.rows(); ++i) {
-			for (unsigned int j = 0; j < first.cols(); ++j) {
-				for (unsigned int k = 0; k < second.rows(); ++k) {
+		Dyadic2N result(first.rows());
+		for (unsigned int i = 0; i < first.rows(); ++i) {
+			for (unsigned int j = 0; j < second.cols(); ++j) {
+				for (unsigned int k = 0; k < first.cols(); ++k) {
 					result.at(i, j) = first.at(i, k) * second.at(k, j);
 				}
 			}
@@ -129,6 +129,11 @@ namespace M2S2 {
 		return result;
 	}
 
+	// ================================================================================================
+	//
+	// Dyadics and Scalars
+	//
+	// ================================================================================================
 	inline Dyadic2N operator+(const double& alfa, const Dyadic2N& dyadic)
 	{
 		return dyadic + alfa;
@@ -159,6 +164,113 @@ namespace M2S2 {
 		return dyadic * alfa;
 	}
 
+	// ================================================================================================
+	//
+	// Operators for Symmetric and Asymmetric matrices
+	//
+	// ================================================================================================
+	//
+	// Symmetric + Asymmetric matrices
+	//
+	// ================================================================================================
+	inline MatrixX operator+(const MatrixS& first, const MatrixX& second)
+	{
+		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
+		assert(first.cols() == second.cols());		// Size of dyadics does not correspond!
+
+		MatrixX result(first.rows(), first.cols());
+		for (unsigned int i = 0; i < first.rows(); ++i) {
+			for (unsigned int j = 0; j < first.cols(); ++j) {
+				result.at(i, j) = first.at(i, j) + second.at(i, j);
+			}
+		}
+		return result;
+	}
+
+	// ================================================================================================
+	//
+	// Symmetric - Asymmetric matrices
+	//
+	// ================================================================================================
+	inline MatrixX operator-(const MatrixS& first, const MatrixX& second)
+	{
+		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
+		assert(first.cols() == second.cols());		// Size of dyadics does not correspond!
+
+		MatrixX result(first.rows(), first.cols());
+		for (unsigned int i = 0; i < first.rows(); ++i) {
+			for (unsigned int j = 0; j < first.cols(); ++j) {
+				result.at(i, j) = first.at(i, j) - second.at(i, j);
+			}
+		}
+		return result;
+	}
+
+	// ================================================================================================
+	//
+	// Symmetric * Asymmetric matrices
+	//
+	// ================================================================================================
+	inline MatrixX operator*(const MatrixS& first, const MatrixX& second)
+	{
+		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
+
+		MatrixX result(first.rows(), second.cols());
+		for (unsigned int i = 0; i < first.rows(); ++i) {
+			for (unsigned int j = 0; j < second.cols(); ++j) {
+				for (unsigned int k = 0; k < first.cols(); ++k) {
+					result.at(i, j) += first.at(i, k) * second.at(k, j);
+				}
+			}
+		}
+		return result;
+	}
+
+	// ================================================================================================
+	//
+	// Asymmetric + Symmetric matrices
+	//
+	// ================================================================================================
+	inline MatrixX operator+(const MatrixX& first, const MatrixS& second)
+	{
+		return (second + first);
+	}
+
+	// ================================================================================================
+	//
+	// Asymmetric - Symmetric matrices
+	//
+	// ================================================================================================
+	inline MatrixX operator-(const MatrixX& first, const MatrixS& second)
+	{
+		return (second - first) * (-1.);
+	}
+
+	// ================================================================================================
+	//
+	// Asymmetric * Symmetric matrices
+	//
+	// ================================================================================================
+	inline MatrixX operator*(const MatrixX& first, const MatrixS& second)
+	{
+		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
+
+		MatrixX result(first.rows(), second.cols());
+		for (unsigned int i = 0; i < first.rows(); ++i) {
+			for (unsigned int j = 0; j < second.cols(); ++j) {
+				for (unsigned int k = 0; k < first.cols(); ++k) {
+					result.at(i, j) += first.at(i, k) * second.at(k, j);
+				}
+			}
+		}
+		return result;
+	}
+
+	// ================================================================================================
+	//
+	// Dyadics and Scalars
+	//
+	// ================================================================================================
 	inline MatrixX operator+(const double& alfa, const MatrixX& dyadic)
 	{
 		return dyadic + alfa;
@@ -188,7 +300,6 @@ namespace M2S2 {
 	{
 		return dyadic * alfa;
 	}
-
 
 	// ================================================================================================
 	//
@@ -331,7 +442,6 @@ namespace M2S2 {
 	}
 
 	/** @return the transpose of a CSR sparse matrix. Notice that, for symmetric matrices, a row major matrix will become column major matrix.
-	  * 
 	  */
 	static inline CSR transpose(const CSR& input) {
 		CSR output;

@@ -331,7 +331,7 @@ namespace M2S2 {
 
 			MatrixX result(mv_nRow, other.mv_nCol);
 			for (unsigned int i = 0; i < mv_nRow; i++) {
-				for (unsigned int j = i; j < other.mv_nCol; j++) {
+				for (unsigned int j = 0; j < other.mv_nCol; j++) {
 					for (unsigned int k = 0; k < mv_nCol; k++) {
 						result.at(i, j) += at(i, k) * other.at(k, j);
 					}

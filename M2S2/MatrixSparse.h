@@ -176,9 +176,9 @@ namespace M2S2 {
             else {
                 // Compute number of itens in CSR
                 int nnz = 0;
+                int col = 0;
                 other.mv_sym = mv_sym;
                 other.mv_rows = mv_line.size();
-                other.mv_cols = mv_line.size();
                 other.mv_rowIndex.reserve(mv_line.size() + 1);
                 // nnz -> number of the first component in line
                 for (int i = 0; i < mv_line.size(); ++i) {
@@ -193,8 +193,12 @@ namespace M2S2 {
                     for (int j = 0; j < mv_line.at(i).mv_index.size(); ++j) {
                         other.mv_colIndex.push_back(mv_line.at(i).mv_index.at(j));
                         other.mv_value.push_back(mv_line.at(i).mv_value.at(j));
+
+                        col = (col < other.mv_colIndex.back()) ? col : other.mv_colIndex.back();
                     }
                 }
+                // If not sym, the number of columns is the greatest value from colIndex
+                other.mv_cols = mv_sym ? mv_line.size() : col + 1;
             }
         }
 

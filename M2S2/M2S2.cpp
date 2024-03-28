@@ -40,7 +40,8 @@ int main()
 	std::cout << INPUT("\nClick a button to continue!");
 	//std::cin.get();
 
-	M2S2::unitTest_Dyadis2S();
+	//M2S2::unitTest_Dyadic2S();
+	M2S2::unitTest_Dyadic2N();
 
 	/*
 	Here is what we are trying to solve (notice that it is symmetric):
@@ -244,3 +245,30 @@ int main()
 
 	return 0;
 }
+
+
+// Just don't forget:
+// 
+// std::invalid_argument 
+// an argument value has not been accepted.
+//
+// std::domain_error
+// the inputs are outside of the domain on which an operation is defined
+//
+// std::length_error
+// attempts to exceed implementation defined length limits for some object.
+//
+// std::out_of_range
+// attempt to access elements out of defined range.
+//
+// std::runtime_error
+// due to events beyond the scope of the program and can not be easily predicted.
+//
+// std::range_error
+// used to report range errors (that is, situations where a result of a computation cannot be represented by the destination type).
+//
+// std::overflow_error
+// used to report arithmetic overflow errors (that is, situations where a result of a computation is too large for the destination type).
+//
+// std::underflow_error
+// used to report arithmetic underflow errors (that is, situations where the result of a computation is a subnormal floating - point value).

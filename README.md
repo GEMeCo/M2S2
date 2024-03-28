@@ -93,7 +93,7 @@ M2S2 brings up several dyadics and matrices for your usage as classes. Each one 
 ```cpp
 M2S2::Dyadic2S matrix(3);                 // 3x3 symmetric matrix
 M2S2::Dyadic2S symM2({ 0, 1, 2 });        // 2x2 symmetric matrix: | 0.0   1.0 |
-                                                                   | 1.0   2.0 |
+                                          //                       | 1.0   2.0 |
 M2S2::Dyadic2S symM3(symM1);              // Copy constructor
 M2S2::Dyadic2S symM4 = symM2;             // Assignment constructor
 
@@ -138,8 +138,8 @@ std::vector<double> invar, eigen;
 double value;
 
 value = mat.determinant();               // determinant is available for Dyadic2S and Dyadic2N
-invar = mat.invariants();                // matrix invariants are returned as a vector
-eigen = mat.eigenvalues();               // matrix eigenvalues are returned as a vector
+invar = mat.invariants();                // matrix invariants are returned as std::vector
+eigen = mat.eigenvalues();               // matrix eigenvalues are returned as std::vector
 ```
 
 #### Dimensions
@@ -165,12 +165,12 @@ std::vector<double> vec(3);
 M2S2::Dyadic2N resN(3);
 std::vector<double> resV;
 
-resV = matS * vec;                        // Dot or Inner product of symmetric dyadic and vector
-resN = matC * matN;                       // Dot or Inner product of 4th rank symmetric dyadic and 2nd rank asymetric dyadic
+resV = matS * vec;                        // Dot / Inner product of symmetric dyadic and vector
+resN = matC * matN;                       // Dot / Inner product of 4th rank symmetric dyadic and 2nd rank asymetric dyadic
 ```
 
 #### Dyadic-Dyadic operations
-Dyadics of same type and rank can be summed, substracted and multiplied. Constraction is also available as a method.
+Dyadics of same type and rank can be summed, substracted and multiplied. Contraction is also available as a method.
 
 ```cpp
 M2S2::Dyadic2S matS1(3), matS2(3), resS(3);
@@ -196,7 +196,7 @@ matN1 /= 3.;                            // Cummulative division of every element
 ```
 
 #### Sparse matrix operations
-Please, see attached `cpp` file to create and push values to a sparse matrix, and then saving it as a CSR matrix.
+See attached `cpp` file to see an example of how to create and push values to a sparse matrix, and then saving it as a CSR matrix.
 
 Documentation
 -------------

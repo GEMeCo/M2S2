@@ -165,6 +165,8 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline double& at(unsigned int i, unsigned int j) {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2S method .at"));
+
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
 			if(pos > mv_nVoigt) throw std::out_of_range(ERROR("Out of range in Dyadic2S method .at: Unable to access required element!"));
 			return mv_Values.at(pos);
@@ -175,6 +177,8 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline const double& at(unsigned int i, unsigned int j) const {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2S method .at"));
+
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
 			if (pos > mv_nVoigt) throw std::out_of_range(ERROR("Out of range in Dyadic2S method .at: Unable to access required element!"));
 			return mv_Values.at(pos);
@@ -185,6 +189,8 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline double& operator()(unsigned int i, unsigned int j) {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2S method .at"));
+
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
 			if (pos > mv_nVoigt) throw std::out_of_range(ERROR("Out of range in Dyadic2S method .at: Unable to access required element!"));
 			return mv_Values.at(pos);
@@ -195,6 +201,8 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline const double& operator()(unsigned int i, unsigned int j) const {
+			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2S method .at"));
+
 			unsigned int pos = (i > j) ? (unsigned int)(j * (mv_nDim - j * 0.5 - 0.5) + i) : (unsigned int)(i * (mv_nDim - i * 0.5 - 0.5) + j);
 			if (pos > mv_nVoigt) throw std::out_of_range(ERROR("Out of range in Dyadic2S method .at: Unable to access required element!"));
 			return mv_Values.at(pos);
@@ -220,7 +228,7 @@ namespace M2S2 {
 		  */
 		const std::vector<double>& getVector() const { return mv_Values; }
 
-		/** @return a vector with tensor written in Voigt notation with mnemonics rule.
+		/** @return current tensor written as vector in Voigt notation with mnemonics rule.
 		  * V(1) = T(1,1); V(2) = T(2,2); V(3) = T(3,3); V(4) = T(2,3); V(5) = T(1,3); V(6) = T(1,2)
 		  */
 		std::vector<double> getVoigtMnemonics()
@@ -288,7 +296,11 @@ namespace M2S2 {
 			bool mi_check = true;
 			if(mv_nDim == other.mv_nDim && mv_nVoigt == other.mv_nVoigt) {
 				for (int i = 0; i < mv_nVoigt; ++i) {
-					if ((int)(mv_Values.at(i) - other.mv_Values.at(i))*1000000 != 0) mi_check = false;
+
+					if (!almost_equal(mv_Values.at(i), other.mv_Values.at(i))) {
+						mi_check = false;
+						break;
+					}
 				}
 				return mi_check;
 			}
@@ -690,10 +702,9 @@ namespace M2S2 {
 
 			double result = 0.;
 			for (unsigned int i = 0; i < mv_nDim; ++i) {
-				result += mv_Values.at(i) * other.mv_Values.at(i);
-			}
-			for (unsigned int i = mv_nDim; i < mv_Values.size(); ++i) {
-				result += 2. * mv_Values.at(i) * other.mv_Values.at(i);
+				for (unsigned int j = 0; j < mv_nDim; ++j) {
+					result += at(i, j) * other.at(i, j);
+				}
 			}
 			return result;
 		}

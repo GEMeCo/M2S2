@@ -25,6 +25,7 @@
 #include <algorithm>    // required by std::copy() and std::assign()
 #include <cassert>		// required by assert (programing checks)
 #include <exception>	// required by exception (runtime errors)
+#include <cstdint>		// unsigned long int 64 bits
 
 // Coloring output
 #define RESET "\x1B[0m"
@@ -42,3 +43,20 @@
 
 constexpr double MV_PI = 3.14159265358979323846;
 constexpr double mg_zero = 0.;
+
+/** Checks if doubles are close enough
+  * @param l left number
+  * @param r right number
+  * @param tol Comparison tolarance. Default is 10^-14
+  * 
+  * @tparam Tfp Floating point type (double, float, etc)
+  */
+template<typename Tfp>
+bool almost_equal(Tfp l, Tfp r, Tfp tol = std::numeric_limits<Tfp>::epsilon() * (Tfp)100)
+{
+    Tfp mi_dif = std::fabs(l - r);
+    if (mi_dif <= tol) return true;
+    if (mi_dif < std::fmax(std::fabs(l), std::fabs(r)) * tol) return true;
+
+    return false;
+}
