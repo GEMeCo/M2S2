@@ -2,7 +2,7 @@
 // 
 // This file is part of M2S2 - Matrices for Mechanices of Solids and Structures
 //
-// Copyright(C) 2023 
+// Copyright(C) 2024 
 //		Dorival Piedade Neto &
 //		Rodrigo Ribeiro Paccola &
 //		Rogério Carrazedo
@@ -31,6 +31,17 @@ namespace M2S2 {
       * @brief Sparse matrix is a matrix in which most of the elements are zero. Thus, only non-zero values are stored.
       */
     class sparseMatrix {
+
+    public:
+        /** @brief If not symmetric, sym = false */
+        bool mv_sym = false;
+
+        /** @brief May be 'R' or 'C' (Row major or Column major) */
+        char mv_type = 'R';
+
+        /** @brief Lines of the sparse matrix. */
+        std::vector<M2S2::line> mv_line;
+
     public:
         /** M2S2 sparse matrix implementation.
           */
@@ -42,16 +53,21 @@ namespace M2S2 {
           * @param type Row major or Column major ('R' or 'C'). Default is row major.
           */
         sparseMatrix(const int& nLines, const bool& sym = false, const char& type = 'R') {
+            mv_type = toupper(type);
+            assert(mv_type == 'R' || mv_type == 'C'); // Wrong type
+
             mv_line.resize(nLines);
             mv_sym = sym;
-            mv_type = type;
         }
 
         /** Move constructor for M2S2 sparse matrix.
           * @param other sparseMatrix to be moved.
           */
         sparseMatrix(sparseMatrix&& other) noexcept :
-            mv_sym(other.mv_sym), mv_type(other.mv_type), mv_line(std::move(other.mv_line)) { }
+            mv_sym(other.mv_sym), mv_type(other.mv_type), mv_line(std::move(other.mv_line)) {
+            other.mv_sym = false;
+            other.mv_type = 'R';
+        }
 
         /** Destructor.
           */
@@ -61,16 +77,6 @@ namespace M2S2 {
         // Copy constructor is deleted for obvious reason (2 sparse matrices in memory?).
         // Use copy function instead
         sparseMatrix(const sparseMatrix& other) = delete;
-
-    public:
-        /** @brief If not symmetric, sym = false */
-        bool mv_sym = false;
-
-        /** @brief May be 'R' or 'C' (Row major or Column major) */
-        char mv_type = 'R';
-
-        /** @brief Lines of the sparse matrix. */
-        std::vector<M2S2::line> mv_line;
 
     public:
         /** Overloads operator << to stream the matrix. */

@@ -63,11 +63,12 @@ Features
     - :boom: M2S2::Dyadic4S - Symmetric 4th rank tensors of 2 or 3 dimensional vector space;
     - :boom: M2S2::Dyadic4C - 4th order tensor for orthotropic constitutive matrices, in either 2 or 3 dimensional vector space;
     - :boom: M2S2::MatrixS - Symmetric square matrix of any order.
-    - :boom: M2S2::MatrixS - 2nd rank matrices of any size, even not square.
+    - :boom: M2S2::MatrixX - 2nd rank matrices of any size, even not square.
 
 - v0.2.0: Sparse Matrices
     - :boom: M2S2::sparseMatrix - Symmetric and Asymmetric square sparse matrices;
     - :boom: Save the sparseMatrix as CSR or CSC (Compressed Sparse Row or Compressed Sparse Column)
+    - :boom: All features of M2S2 dyadics and matrices (but sparse) may be verified by unitTest() function.
 
 Resources
 ---------
@@ -197,6 +198,7 @@ matN1 /= 3.;                            // Cummulative division of every element
 
 #### Sparse matrix operations
 See attached `cpp` file to see an example of how to create and push values to a sparse matrix, and then saving it as a CSR matrix.
+See also unitTest.h, as it provides several examples of how to use M2S2 matrices.
 
 Documentation
 -------------

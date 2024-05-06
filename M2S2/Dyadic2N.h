@@ -2,7 +2,7 @@
 // 
 // This file is part of M2S2 - Matrices for Mechanices of Solids and Structures
 //
-// Copyright(C) 2023 
+// Copyright(C) 2024 
 //		Dorival Piedade Neto &
 //		Rodrigo Ribeiro Paccola &
 //		Rogério Carrazedo
@@ -44,6 +44,8 @@ namespace M2S2 {
 		  */
 		Dyadic2N(unsigned int nDim) : mv_nDim(nDim)
 		{
+			if (mv_nDim != 2 && mv_nDim != 3) throw std::invalid_argument(ERROR("Invalid argument on Dyadic2N constructor: Wrong input in the size of vector space!"));
+
 			mv_nSize = nDim * nDim;
 			mv_Values.resize(mv_nSize);
 		}
@@ -54,6 +56,8 @@ namespace M2S2 {
 		  */
 		Dyadic2N(unsigned int nDim, const double& value) : mv_nDim(nDim)
 		{
+			if (mv_nDim != 2 && mv_nDim != 3) throw std::invalid_argument(ERROR("Invalid argument on Dyadic2N constructor: Wrong input in the size of vector space!"));
+
 			mv_nSize = nDim * nDim;
 			mv_Values.resize(mv_nSize, value);
 		}
@@ -166,7 +170,7 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline double& at(unsigned int i, unsigned int j) {
-			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
 			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
@@ -178,7 +182,7 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline const double& at(unsigned int i, unsigned int j) const {
-			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
 			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
@@ -190,7 +194,7 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline double& operator()(unsigned int i, unsigned int j) {
-			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
 			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
@@ -202,7 +206,7 @@ namespace M2S2 {
 		  * @param j Second component.
 		  */
 		inline const double& operator()(unsigned int i, unsigned int j) const {
-			if (i >= mv_nDim || j >= mv_nDim) throw std::domain_error(ERROR("Either the first or the second component is out of range in Dyadic2N method .at"));
+			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
 			if (pos > mv_nSize) throw std::out_of_range(ERROR("Out of range in Dyadic2N method .at: Unable to access required element!"));
@@ -217,7 +221,7 @@ namespace M2S2 {
 		  */
 		unsigned int cols() const noexcept { return mv_nDim; }
 
-		/** @return the number of itens.
+		/** @return the number of components in Voigt notation.
 		  */
 		unsigned int size() const noexcept { return mv_nSize; }
 
@@ -232,7 +236,7 @@ namespace M2S2 {
 		/** @return current tensor written as vector in Voigt notation with mnemonics rule.
 		  * V(1) = T(1,1); V(2) = T(2,2); V(3) = T(3,3); V(4) = T(2,3); V(5) = T(1,3); V(6) = T(1,2); V(7) = T(3,2); V(8) = T(3,1); V(9) = T(2,1)
 		  */
-		std::vector<double> getVoigtMnemonics()
+		std::vector<double> getVoigtMnemonics() const
 		{
 			if (mv_Values.empty()) throw std::runtime_error(ERROR("Invalid request in Dyadic2N method .getVoigtMnemonics: Empty tensor!"));
 
@@ -440,7 +444,7 @@ namespace M2S2 {
 		  */
 		std::vector<double> operator*(const std::vector<double>& vec)
 		{
-			assert(vec.size() == mv_nDim);		// Order of tensor and vector differ
+			if (vec.size() != mv_nDim) throw std::range_error(ERROR("Invalid request in Dyadic2N dot product: Order of tensor and vector differ!"));
 
 			std::vector<double> result(mv_nDim);
 			for (unsigned int i = 0; i < mv_nDim; i++) {
@@ -777,8 +781,8 @@ namespace M2S2 {
 		}
 
 	private:
-		unsigned int mv_nDim;
-		unsigned int mv_nSize;
+		unsigned int mv_nDim;		// Dimensionality of space (2D or 3D)
+		unsigned int mv_nSize;		// Number of components in Voigt notation
 		std::vector<double> mv_Values;
 
 		inline void check_order(const Dyadic2N& other) const

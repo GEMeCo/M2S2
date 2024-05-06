@@ -20,7 +20,7 @@
 
 int main()
 {
-	std::cout << INFO("Copyright(C) 2023 Dorival Piedade Neto & Rodrigo Ribeiro Paccola & Rogerio Carrazedo") << std::endl
+	std::cout << INFO("Copyright(C) 2024 Dorival Piedade Neto & Rodrigo Ribeiro Paccola & Rogerio Carrazedo") << std::endl
 		<< INFO("All Rights Reserved.") << std::endl
 		<< INFO("Structural Engineering Department.") << std::endl
 		<< INFO("University of Sao Paulo at Sao Carlos School of Engineering.") << std::endl << std::endl
@@ -37,11 +37,10 @@ int main()
 		<< INFO("If you are using, please cite it in your reseach. We have a DOI: ") << std::endl
 		<< INFO("Well, not yet :)") << std::endl << std::endl;
 
-	std::cout << INPUT("\nClick a button to continue!");
+	std::cout << INPUT("\nClick a button to continue!") << std::endl;
 	//std::cin.get();
 
-	//M2S2::unitTest_Dyadic2S();
-	M2S2::unitTest_Dyadic2N();
+	M2S2::unitTest();
 
 	/*
 	Here is what we are trying to solve (notice that it is symmetric):

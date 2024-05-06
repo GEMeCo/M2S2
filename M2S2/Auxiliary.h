@@ -2,7 +2,7 @@
 // 
 // This file is part of M2S2 - Matrices for Mechanices of Solids and Structures
 //
-// Copyright(C) 2023 
+// Copyright(C) 2024 
 //		Dorival Piedade Neto &
 //		Rodrigo Ribeiro Paccola &
 //		Rogério Carrazedo

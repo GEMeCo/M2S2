@@ -2,7 +2,7 @@
 // 
 // This file is part of M2S2 - Matrices for Mechanices of Solids and Structures
 //
-// Copyright(C) 2023 
+// Copyright(C) 2024 
 //		Dorival Piedade Neto &
 //		Rodrigo Ribeiro Paccola &
 //		Rogério Carrazedo
@@ -34,12 +34,15 @@ namespace M2S2 {
 	// Operators for Symmetric and Asymmetric dyadics
 	//
 	// ================================================================================================
-	//
-	// Symmetric + Asymmetric dyadics
-	//
-	// ================================================================================================
+
+	/** Overloads operator + for addition -> R_ij = F_ij + S_ij
+	  * @param first First dyadic to be added.
+	  * @param second Second dyadic to be added.
+	  * @return an asymmetric dyadic with the addition of components.
+	  */
 	inline Dyadic2N operator+(const Dyadic2S& first, const Dyadic2N& second)
 	{
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on add operator: Empty tensor!"));
 		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
 
 		Dyadic2N result(second.rows());
@@ -51,13 +54,14 @@ namespace M2S2 {
 		return result;
 	}
 
-	// ================================================================================================
-	//
-	// Symmetric - Asymmetric dyadics
-	//
-	// ================================================================================================
+	/** Overloads operator - for substraction -> R_ij = F_ij - S_ij
+	  * @param first First dyadic to be substracted.
+	  * @param second Second dyadic to be substracted.
+	  * @return an asymmetric dyadic with the substraction of components.
+	  */
 	inline Dyadic2N operator-(const Dyadic2S& first, const Dyadic2N& second)
 	{
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on sub operator: Empty tensor!"));
 		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
 
 		Dyadic2N result(second.rows());
@@ -69,60 +73,62 @@ namespace M2S2 {
 		return result;
 	}
 
-	// ================================================================================================
-	//
-	// Symmetric * Asymmetric dyadics
-	//
-	// ================================================================================================
+	/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
+	  * @param first Dyadic to multiply.
+	  * @param second Dyadic to be multiplied with.
+	  * @return an asymmetric dyadic with the multiplication of components.
+	  */
 	inline Dyadic2N operator*(const Dyadic2S& first, const Dyadic2N& second)
 	{
-		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on mult operator: Empty tensor!"));
+		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
 
 		Dyadic2N result(second.rows());
 		for (unsigned int i = 0; i < result.rows(); ++i) {
 			for (unsigned int j = 0; j < first.cols(); ++j) {
 				for (unsigned int k = 0; k < second.rows(); ++k) {
-					result.at(i, j) = first.at(i, k) * second.at(k, j);
+					result.at(i, j) += first.at(i, k) * second.at(k, j);
 				}
 			}
 		}
 		return result;
 	}
 
-	// ================================================================================================
-	//
-	// Asymmetric + Symmetric dyadics
-	//
-	// ================================================================================================
+	/** Overloads operator + for addition -> R_ij = F_ij + S_ij
+	  * @param first First dyadic to be added.
+	  * @param second Second dyadic to be added.
+	  * @return an asymmetric dyadic with the addition of components.
+	  */
 	inline Dyadic2N operator+(const Dyadic2N& first, const Dyadic2S& second)
 	{
 		return (second + first);
 	}
 
-	// ================================================================================================
-	//
-	// Asymmetric - Symmetric dyadics
-	//
-	// ================================================================================================
+	/** Overloads operator - for substraction -> R_ij = F_ij - S_ij
+	  * @param first First dyadic to be substracted.
+	  * @param second Second dyadic to be substracted.
+	  * @return an asymmetric dyadic with the substraction of components.
+	  */
 	inline Dyadic2N operator-(const Dyadic2N& first, const Dyadic2S& second)
 	{
 		return (second - first) * (-1.);
 	}
 
-	// ================================================================================================
-	//
-	// Asymmetric * Symmetric dyadics
-	//
-	// ================================================================================================
+	/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
+	  * @param first Dyadic to multiply.
+	  * @param second Dyadic to be multiplied with.
+	  * @return an asymmetric dyadic with the multiplication of components.
+	  */
 	inline Dyadic2N operator*(const Dyadic2N& first, const Dyadic2S& second)
 	{
-		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on add operator: Empty tensor!"));
+		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
 
 		Dyadic2N result(first.rows());
 		for (unsigned int i = 0; i < first.rows(); ++i) {
 			for (unsigned int j = 0; j < second.cols(); ++j) {
 				for (unsigned int k = 0; k < first.cols(); ++k) {
-					result.at(i, j) = first.at(i, k) * second.at(k, j);
+					result.at(i, j) += first.at(i, k) * second.at(k, j);
 				}
 			}
 		}
@@ -134,32 +140,123 @@ namespace M2S2 {
 	// Dyadics and Scalars
 	//
 	// ================================================================================================
-	inline Dyadic2N operator+(const double& alfa, const Dyadic2N& dyadic)
-	{
-		return dyadic + alfa;
-	}
 
-	inline Dyadic2N operator-(const double& alfa, const Dyadic2N& dyadic)
-	{
-		return (dyadic - alfa) * (-1.);
-	}
-
-	inline Dyadic2N operator*(const double& alfa, const Dyadic2N& dyadic)
-	{
-		return dyadic * alfa;
-	}
-
+	/** Overloads operator + to sum a scalar with a dyadic -> T_ij = T_ij + alfa
+	  * @param alfa Scalar to be added.
+	  * @param dyadic
+	  * @return a dyadic with the result.
+	  */
 	inline Dyadic2S operator+(const double& alfa, const Dyadic2S& dyadic)
 	{
 		return dyadic + alfa;
 	}
 
+	/** Overloads operator - to substract a scalar with a dyadic -> T_ij = alfa - T_ij
+	  * @param alfa Scalar to be substracted.
+	  * @param dyadic Dyadic to be substracted with.
+	  * @return a dyadic with the result.
+	  */
 	inline Dyadic2S operator-(const double& alfa, const Dyadic2S& dyadic)
 	{
 		return (dyadic - alfa) * (-1.);
 	}
 
+	/** Overloads operator * to multiply with a scalar -> T_ij = T_ij * alfa
+	  * @param alfa Scalar to be multiplied with.
+	  * @param dyadic Dyadic to be multiplied with.
+	  * @return a dyadic with the result.
+	  */
 	inline Dyadic2S operator*(const double& alfa, const Dyadic2S& dyadic)
+	{
+		return dyadic * alfa;
+	}
+
+	/** Overloads operator + to sum a scalar with a dyadic -> T_ij = T_ij + alfa
+	  * @param alfa Scalar to be added.
+	  * @param dyadic Dyadic to be added with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic2N operator+(const double& alfa, const Dyadic2N& dyadic)
+	{
+		return dyadic + alfa;
+	}
+
+	/** Overloads operator - to substract a scalar with a dyadic -> T_ij = alfa - T_ij
+	  * @param alfa Scalar to be substracted.
+	  * @param dyadic Dyadic to be substracted with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic2N operator-(const double& alfa, const Dyadic2N& dyadic)
+	{
+		return (dyadic - alfa) * (-1.);
+	}
+
+	/** Overloads operator * to multiply with a scalar -> T_ij = T_ij * alfa
+	  * @param alfa Scalar to be multiplied with.
+	  * @param dyadic Dyadic to be multiplied with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic2N operator*(const double& alfa, const Dyadic2N& dyadic)
+	{
+		return dyadic * alfa;
+	}
+
+	/** Overloads operator + to sum a scalar with a dyadic -> T_ij = T_ij + alfa
+	  * @param alfa Scalar to be added.
+	  * @param dyadic Dyadic to be added with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic4C operator+(const double& alfa, const Dyadic4C& dyadic)
+	{
+		return dyadic + alfa;
+	}
+
+	/** Overloads operator - to substract a scalar with a dyadic -> T_ij = alfa - T_ij
+	  * @param alfa Scalar to be substracted.
+	  * @param dyadic Dyadic to be substracted with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic4C operator-(const double& alfa, const Dyadic4C& dyadic)
+	{
+		return (dyadic - alfa) * (-1.);
+	}
+
+	/** Overloads operator * to multiply with a scalar -> T_ij = T_ij * alfa
+	  * @param alfa Scalar to be multiplied with.
+	  * @param dyadic Dyadic to be multiplied with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic4C operator*(const double& alfa, const Dyadic4C& dyadic)
+	{
+		return dyadic * alfa;
+	}
+
+	/** Overloads operator + to sum a scalar with a dyadic -> T_ij = T_ij + alfa
+	  * @param alfa Scalar to be added.
+	  * @param dyadic Dyadic to be added with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic4S operator+(const double& alfa, const Dyadic4S& dyadic)
+	{
+		return dyadic + alfa;
+	}
+
+	/** Overloads operator - to substract a scalar with a dyadic -> T_ij = alfa - T_ij
+	  * @param alfa Scalar to be substracted.
+	  * @param dyadic Dyadic to be substracted with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic4S operator-(const double& alfa, const Dyadic4S& dyadic)
+	{
+		return (dyadic - alfa) * (-1.);
+	}
+
+	/** Overloads operator * to multiply with a scalar -> T_ij = T_ij * alfa
+	  * @param alfa Scalar to be multiplied with.
+	  * @param dyadic Dyadic to be multiplied with.
+	  * @return a dyadic with the result.
+	  */
+	inline Dyadic4S operator*(const double& alfa, const Dyadic4S& dyadic)
 	{
 		return dyadic * alfa;
 	}
@@ -175,6 +272,7 @@ namespace M2S2 {
 	// ================================================================================================
 	inline MatrixX operator+(const MatrixS& first, const MatrixX& second)
 	{
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on add operator: Empty tensor!"));
 		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
 		assert(first.cols() == second.cols());		// Size of dyadics does not correspond!
 
@@ -194,6 +292,7 @@ namespace M2S2 {
 	// ================================================================================================
 	inline MatrixX operator-(const MatrixS& first, const MatrixX& second)
 	{
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on substraction operator: Empty tensor!"));
 		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
 		assert(first.cols() == second.cols());		// Size of dyadics does not correspond!
 
@@ -213,6 +312,7 @@ namespace M2S2 {
 	// ================================================================================================
 	inline MatrixX operator*(const MatrixS& first, const MatrixX& second)
 	{
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on multiplication operator: Empty tensor!"));
 		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
 
 		MatrixX result(first.rows(), second.cols());
@@ -421,14 +521,11 @@ namespace M2S2 {
 		assert(T1.rows() == T2.rows());		// Size of dyadics does not correspond!
 
 		double result = 0.;
-		auto& V1 = T1.getVector();
-		auto& V2 = T2.getVector();
 
 		for (unsigned int i = 0; i < T1.rows(); ++i) {
-			result += V1.at(i) * V2.at(i);
-		}
-		for (unsigned int i = T1.rows(); i < T1.size(); ++i) {
-			result += 2. * V1.at(i) * V2.at(i);
+			for (unsigned int j = 0; j < T1.cols(); ++j) {
+				result += T1.at(i, j) * T2.at(i, j);
+			}
 		}
 		return result;
 	}
@@ -474,5 +571,4 @@ namespace M2S2 {
 		output.mv_rowIndex.pop_back(); // Exclude the extra index
 		return output;
 	}
-
 }  // End of M2S2 namespace
