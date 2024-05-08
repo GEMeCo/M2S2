@@ -1,6 +1,7 @@
-# M2S2
+# M2S2 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11152222.svg)](https://doi.org/10.5281/zenodo.11152222)
+[![GitHub license](https://img.shields.io/github/license/GEMeCo/M2S2?style=for-the-badge)](https://github.com/GEMeCo/M2S2/blob/main/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/GEMeCo/M2S2?style=for-the-badge)](https://github.com/GEMeCo/M2S2/issues) [![GitHub stars](https://img.shields.io/github/stars/GEMeCo/M2S2?style=for-the-badge)](https://github.com/GEMeCo/M2S2/stargazers)
 
-M2S2 is a simple C++ header-only library for linear algebra applied to mechanics of solids and structures. It is under development in Structural Engineering Department, at Sao Carlos School of Engineering, University of Sao Paulo.
+M2S2 is a simple C++ header-only library for linear algebra applied to mechanics of solids and structures. It was developed in the Structural Engineering Department, at Sao Carlos School of Engineering, University of Sao Paulo..
 
 <h1 align="center">
   <img alt="Banner" title="#Banner" height="150" src="./images/Icon_150.png" />
@@ -51,7 +52,7 @@ Citation
 --------
   Whether it was used in whole or parts, citation is a must!
 
- This library is in Zenodo - thus, we got a DOI: [doi.org/10.5281/zenodo.](https://doi.org/10.5281/zenodo.)
+ This library is in Zenodo - thus, we got a DOI: [doi.org/10.5281/zenodo.11152221](https://doi.org/10.5281/zenodo.11152221)
  
  (:construction: We'll get there, eventually :construction:).
 
@@ -70,6 +71,9 @@ Features
     - :boom: Save the sparseMatrix as CSR or CSC (Compressed Sparse Row or Compressed Sparse Column)
     - :boom: All features of M2S2 dyadics and matrices (but sparse) may be verified by unitTest() function.
 
+- v.1.0: M2S2 goes gold
+    - :boom: Finally, it is fully open for your use. Good luck.
+
 Resources
 ---------
 M2S2 doesn't have any dependencies other than the C++ standard library.
@@ -77,7 +81,7 @@ M2S2 doesn't have any dependencies other than the C++ standard library.
 Building and Running
 --------------------
 1. Clone the source code
-`git clone --recursive https://github.com/GEMeCo/O2P2.git`
+`git clone --recursive https://github.com/GEMeCo/M2S2.git`
 
 2. Just include the main header file (don't forget to setup including directories). That's all there is to it. Good luck :innocent:.
 
@@ -124,11 +128,11 @@ double val;
 matrix(0,0) = 10.;                        // Sets 10. on 1st row and 1st col
 val = matrix.at(1,2)                      // Gets the value from 2nd row and 3rd col
 ```
-:traffic_light: No boundaries are checked. Also notice that rows and columns are indexed from 0. :traffic_light:
+:traffic_light: Most boundaries are checked. Also notice that rows and columns are indexed from 0. :traffic_light:
 
 ### Using
 M2S2 provides several matrices operations, using operators or functions. See documentation for details. A few examples are provided.
-:traffic_light: Most operations have their boundaries checked. Most! :traffic_light:
+:traffic_light: Most operations have their boundaries checked. Most, not all! :traffic_light:
 
 #### Basic operations
 M2S2 focuses on second order tensors of two and three-dimensional Euclidean spaces. Some useful functions may be easily accessed.
@@ -186,7 +190,7 @@ res = matS1.contraction(matS2);         // Contraction or double dot product
 ```
 
 #### Dyadic-scalar operations
-Dyadics can be summed, substracted, multiplied and divided by scalars using operators.
+Dyadics can be summed, substracted, multiplied and even divided by scalars using operators.
 
 ```cpp
 M2S2::Dyadic2S matS1(3), resS(3);

@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: "M2S2: Beta release"
+abstract: "M2S2 is a simple C++ header-only library for linear algebra applied to mechanics of solids and structures. It was developed in the Structural Engineering Department, at Sao Carlos School of Engineering, University of Sao Paulo."
+message: "If you use this software, please cite it using the metadata from this file."
+authors:
+  - family-names: Carrazedo
+    given-names: Rogério
+    orcid: "https://orcid.org/0000-0003-2750-034X"
+  - family-names: Paccola
+    given-names: "Rodrigo Ribeiro"
+    website: "https://orcid.org/0000-0002-9228-4180"
+  - family-names: "Piedade Neto"
+    given-names: Dorival
+    website: "http://lattes.cnpq.br/6930392733648456"
+keywords:
+  - "Linear Algebra"
+  - Dyadics
+  - "Sparse matrices"
+identifiers:
+  - description: "This is the collection of archived versions of M2S2"
+    type: doi
+    value: 
+  - description: "This is the archived version 1.0.0 of M2S2"
+    type: doi
+    value:
+date-released: 2024-05-20
+license: Apache-2.0
+repository-code: "https://github.com/GEMeCo/M2S2"
+version: v1.0.0

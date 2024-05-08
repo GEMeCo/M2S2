@@ -519,6 +519,21 @@ namespace M2S2 {
 			return result;
 		}
 
+		/** @return the matrix as symmetric (even if it is not). Must at least be square.
+		  */
+		MatrixS SaveAsMatrixS() const
+		{
+			assert(mv_nRow == mv_nCol);		// Number of rows and columns must at least be the same
+
+			MatrixS result(mv_nCol);
+			for (unsigned int i = 0; i < mv_nRow; ++i) {
+				for (unsigned int j = i; j < mv_nCol; ++j) {
+					result.at(i, j) = at(i, j);
+				}
+			}
+			return result;
+		}
+
 	private:
 		unsigned int mv_nRow;		// Number of rows
 		unsigned int mv_nCol;		// Number of columns

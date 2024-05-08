@@ -34,12 +34,12 @@ int main()
 		<< INFO("Neither the name of the copyright holder nor the names of any other contributors") << std::endl
 		<< INFO("may be used to endorse or promote products derived from this software without") << std::endl
 		<< INFO("specific prior written permission.") << std::endl << std::endl
-		<< INFO("If you are using, please cite it in your reseach. We have a DOI: ") << std::endl
-		<< INFO("Well, not yet :)") << std::endl << std::endl;
+		<< INFO("If you are using, please cite it in your reseach. We have a DOI: 10.5281/zenodo.11152221") << std::endl << std::endl;
 
 	std::cout << INPUT("\nClick a button to continue!") << std::endl;
-	//std::cin.get();
+	std::cin.get();
 
+	// If you modified something, check if something is no longer working.
 	M2S2::unitTest();
 
 	/*
@@ -68,7 +68,7 @@ int main()
 	mi_spMatrix.setAllLineSize(size - 1);
 
 	// We can push the dyadic to the sparse matrix as triplets, as MatrixS, or MatrixX
-	// But since we are have a symmetric system of equations, MatrixX is not an alternative
+	// But since we are using a symmetric system of equations here, MatrixX is not an alternative
 
 	// ------------------------------------------------------------------------------------
 	// Pushing the dyadics as triplets
@@ -99,8 +99,11 @@ int main()
 	mi_spMatrix.push(mi_t4, mi_t4_index);
 	// ------------------------------------------------------------------------------------
 
-	// After getting every contribution, we add equal terms, reducing the size of the matrix
+	// After getting every contribution, we add the equal terms, reducing the size of the matrix
 	mi_spMatrix.addEqualTerms();
+
+	// You may print any dyadic or matrix using <<
+	std::cout << mi_spMatrix;
 
 	// Pardiso uses CSR matrices, thus needs conversion
 	M2S2::CSR mi_csrMatrix;
