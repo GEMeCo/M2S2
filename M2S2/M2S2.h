@@ -121,13 +121,34 @@ namespace M2S2 {
 	  */
 	inline Dyadic2N operator*(const Dyadic2N& first, const Dyadic2S& second)
 	{
-		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on add operator: Empty tensor!"));
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on mult operator: Empty tensor!"));
 		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
 
 		Dyadic2N result(first.rows());
 		for (unsigned int i = 0; i < first.rows(); ++i) {
 			for (unsigned int j = 0; j < second.cols(); ++j) {
 				for (unsigned int k = 0; k < first.cols(); ++k) {
+					result.at(i, j) += first.at(i, k) * second.at(k, j);
+				}
+			}
+		}
+		return result;
+	}
+
+	/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
+	  * @param first Dyadic to multiply.
+	  * @param second Dyadic to be multiplied with.
+	  * @return an asymmetric dyadic with the multiplication of components.
+	  */
+	inline Dyadic2N operator*(const Dyadic2S& first, const Dyadic2S& second)
+	{
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on mult operator: Empty tensor!"));
+		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
+
+		Dyadic2N result(first.rows());
+		for (unsigned int i = 0; i < first.rows(); i++) {
+			for (unsigned int j = 0; j < second.cols(); j++) {
+				for (unsigned int k = 0; k < first.cols(); k++) {
 					result.at(i, j) += first.at(i, k) * second.at(k, j);
 				}
 			}
@@ -270,6 +291,12 @@ namespace M2S2 {
 	// Symmetric + Asymmetric matrices
 	//
 	// ================================================================================================
+
+	/** Overloads operator + for addition -> R_ij = F_ij + S_ij
+	  * @param first First matrix to be added.
+	  * @param second Second matrix to be added.
+	  * @return an asymmetric matrix with the addition of components.
+	  */
 	inline MatrixX operator+(const MatrixS& first, const MatrixX& second)
 	{
 		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on add operator: Empty tensor!"));
@@ -290,11 +317,17 @@ namespace M2S2 {
 	// Symmetric - Asymmetric matrices
 	//
 	// ================================================================================================
+
+	/** Overloads operator - for substraction -> R_ij = F_ij - S_ij
+	  * @param first First matrix to be substracted.
+	  * @param second Second matrix to be substracted.
+	  * @return an asymmetric matrix with the substraction of components.
+	  */
 	inline MatrixX operator-(const MatrixS& first, const MatrixX& second)
 	{
 		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on substraction operator: Empty tensor!"));
-		assert(first.rows() == second.rows());		// Size of dyadics does not correspond!
-		assert(first.cols() == second.cols());		// Size of dyadics does not correspond!
+		assert(first.rows() == second.rows());		// Size of matrices does not correspond!
+		assert(first.cols() == second.cols());		// Size of matrices does not correspond!
 
 		MatrixX result(first.rows(), first.cols());
 		for (unsigned int i = 0; i < first.rows(); ++i) {
@@ -310,10 +343,16 @@ namespace M2S2 {
 	// Symmetric * Asymmetric matrices
 	//
 	// ================================================================================================
+
+	/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
+	  * @param first Matrix to multiply.
+	  * @param second Matrix to be multiplied with.
+	  * @return an asymmetric matrix with the multiplication of components.
+	  */
 	inline MatrixX operator*(const MatrixS& first, const MatrixX& second)
 	{
 		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on multiplication operator: Empty tensor!"));
-		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
+		assert(first.cols() == second.rows());		// Size of matrices does not correspond!
 
 		MatrixX result(first.rows(), second.cols());
 		for (unsigned int i = 0; i < first.rows(); ++i) {
@@ -331,6 +370,12 @@ namespace M2S2 {
 	// Asymmetric + Symmetric matrices
 	//
 	// ================================================================================================
+
+	/** Overloads operator + for addition -> R_ij = F_ij + S_ij
+	  * @param first First matrix to be added.
+	  * @param second Second matrix to be added.
+	  * @return an asymmetric matrix with the addition of components.
+	  */
 	inline MatrixX operator+(const MatrixX& first, const MatrixS& second)
 	{
 		return (second + first);
@@ -341,6 +386,12 @@ namespace M2S2 {
 	// Asymmetric - Symmetric matrices
 	//
 	// ================================================================================================
+
+	/** Overloads operator - for substraction -> R_ij = F_ij - S_ij
+	  * @param first First matrix to be substracted.
+	  * @param second Second matrix to be substracted.
+	  * @return an asymmetric matrix with the substraction of components.
+	  */
 	inline MatrixX operator-(const MatrixX& first, const MatrixS& second)
 	{
 		return (second - first) * (-1.);
@@ -351,6 +402,12 @@ namespace M2S2 {
 	// Asymmetric * Symmetric matrices
 	//
 	// ================================================================================================
+
+	/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
+	  * @param first Matrix to multiply.
+	  * @param second Matrix to be multiplied with.
+	  * @return an asymmetric matrix with the multiplication of components.
+	  */
 	inline MatrixX operator*(const MatrixX& first, const MatrixS& second)
 	{
 		assert(first.cols() == second.rows());		// Size of dyadics does not correspond!
@@ -366,9 +423,30 @@ namespace M2S2 {
 		return result;
 	}
 
+	/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
+	  * @param first Matrix to multiply.
+	  * @param second Matrix to be multiplied with.
+	  * @return an asymmetric matrix with the multiplication of components.
+	  */
+	inline MatrixX operator*(const MatrixS& first, const MatrixS& second)
+	{
+		if (first.getVector().empty() || second.getVector().empty()) throw std::runtime_error(ERROR("Invalid request on mult operator: Empty tensor!"));
+		assert(first.cols() == second.rows());		// Size of matrices does not correspond!
+
+		MatrixX result(first.rows(), second.cols());
+		for (unsigned int i = 0; i < first.rows(); i++) {
+			for (unsigned int j = 0; j < second.cols(); j++) {
+				for (unsigned int k = 0; k < first.cols(); k++) {
+					result.at(i, j) += first.at(i, k) * second.at(k, j);
+				}
+			}
+		}
+		return result;
+	}
+
 	// ================================================================================================
 	//
-	// Dyadics and Scalars
+	// Matrix and Scalars
 	//
 	// ================================================================================================
 	inline MatrixX operator+(const double& alfa, const MatrixX& dyadic)

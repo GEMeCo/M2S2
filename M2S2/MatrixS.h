@@ -323,24 +323,6 @@ namespace M2S2 {
 			return *this;
 		}
 
-		/** Overloads operator *= for cumulative multiplication -> T *= O -> T_ij = T_ik * O_kj
-		  * @param other Matrix to be multiplied with.
-		  */
-		MatrixS& operator*=(const MatrixS& other)
-		{
-			check_order(other);
-			MatrixS result(mv_nSize);
-			for (unsigned int i = 0; i < mv_nSize; i++) {
-				for (unsigned int j = i; j < mv_nSize; j++) {
-					for (unsigned int k = 0; k < mv_nSize; k++) {
-						result.at(i, j) += at(i, k) * other.at(k, j);
-					}
-				}
-			}
-			swap(result);
-			return *this;
-		}
-
 		/** Overloads operator + for addition -> T = T + O
 		  * @param other Matrix to be added.
 		  */
@@ -363,23 +345,6 @@ namespace M2S2 {
 			MatrixS result(mv_nSize);
 			for (unsigned int i = 0; i < mv_Values.size(); ++i) {
 				result.mv_Values.at(i) = mv_Values.at(i) - other.mv_Values.at(i);
-			}
-			return result;
-		}
-
-		/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
-		  * @param other Matrix to be multiplied with.
-		  */
-		MatrixS operator*(const MatrixS& other) const
-		{
-			check_order(other);
-			MatrixS result(mv_nSize);
-			for (unsigned int i = 0; i < mv_nSize; i++) {
-				for (unsigned int j = i; j < mv_nSize; j++) {
-					for (unsigned int k = 0; k < mv_nSize; k++) {
-						result.at(i, j) += at(i, k) * other.at(k, j);
-					}
-				}
 			}
 			return result;
 		}

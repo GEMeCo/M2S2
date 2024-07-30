@@ -344,24 +344,6 @@ namespace M2S2 {
 			return *this;
 		}
 
-		/** Overloads operator *= for cumulative multiplication -> T *= O -> T_ij = T_ik * O_kj
-		  * @param other Dyadic to be multiplied with.
-		  */
-		Dyadic2S& operator*=(const Dyadic2S& other)
-		{
-			check_order(other);
-			Dyadic2S result(mv_nDim);
-			for (unsigned int i = 0; i < mv_nDim; i++) {
-				for (unsigned int j = i; j < mv_nDim; j++) {
-					for (unsigned int k = 0; k < mv_nDim; k++) {
-						result.at(i, j) += at(i, k) * other.at(k, j);
-					}
-				}
-			}
-			swap(result);
-			return *this;
-		}
-
 		/** Overloads operator + for addition -> T = T + O
 		  * @param other Dyadic to be added.
 		  */
@@ -384,23 +366,6 @@ namespace M2S2 {
 			Dyadic2S result(*this);
 			for (unsigned int i = 0; i < mv_Values.size(); ++i) {
 				result.mv_Values.at(i) -= other.mv_Values.at(i);
-			}
-			return result;
-		}
-
-		/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
-		  * @param other Dyadic to be multiplied with.
-		  */
-		Dyadic2S operator*(const Dyadic2S& other) const
-		{
-			check_order(other);
-			Dyadic2S result(mv_nDim);
-			for (unsigned int i = 0; i < mv_nDim; i++) {
-				for (unsigned int j = i; j < mv_nDim; j++) {
-					for (unsigned int k = 0; k < mv_nDim; k++) {
-						result.at(i, j) += at(i, k) * other.at(k, j);
-					}
-				}
 			}
 			return result;
 		}

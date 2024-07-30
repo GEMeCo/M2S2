@@ -660,9 +660,9 @@ namespace M2S2 {
 			}
 
 			{
-				// Operators * and *=
-				Dyadic2S mi_d2S_1;
-				Dyadic2S mi_d2S_4;
+				// Operator *
+				Dyadic2N mi_d2N_1;
+				Dyadic2N mi_d2N_4;
 
 				Dyadic2S mi_d2S_2({ 30., -5., 36. });
 				Dyadic2S mi_d2S_3({ 12., -4., 14. });
@@ -670,15 +670,15 @@ namespace M2S2 {
 				Dyadic2S mi_d2S_5({ 40., 49., -4., 12., -38.,  81. });
 				Dyadic2S mi_d2S_6({ 23., -9., -3., 21.,  18., -60. });
 
-				mi_d2S_1 = mi_d2S_2 * mi_d2S_3;
-				mi_d2S_2 *= mi_d2S_3;
-				if (mi_d2S_1 != mi_d2S_2) mi_loc_check = false;
+				Dyadic2N expected1({ 380, -190, -204, 524 });
+				Dyadic2N expected2({ 491, 597, 1002, 1133, -873, 2349, 7, 696, -5532});
 
-				mi_d2S_4 = mi_d2S_5 * mi_d2S_6;
-				mi_d2S_5 *= mi_d2S_6;
-				if (mi_d2S_4 != mi_d2S_5) mi_loc_check = false;
+				mi_d2N_1 = mi_d2S_2 * mi_d2S_3;
+				if (mi_d2N_1 != expected1) mi_loc_check = false;
+				mi_d2N_4 = mi_d2S_5 * mi_d2S_6;
+				if (mi_d2N_4 != expected2) mi_loc_check = false;
 				if (!mi_loc_check) {
-					std::cout << ERROR("Dyadic2S multiplication operators ( * and *= ) Failed!!");
+					std::cout << ERROR("Dyadic2S multiplication operator ( * ) Failed!!");
 					mi_glob_check = false;
 					mi_loc_check = true;
 				}
@@ -3411,17 +3411,17 @@ namespace M2S2 {
 			}
 
 			{
-				// Operators * and *=
-				MatrixS mi_MS_1;
+				// Operators *
+				MatrixX mi_MS_1;
 				MatrixS mi_MS_2(3, { 40., 49., -4., 12., -38.,  81. });
 				MatrixS mi_MS_3(3, { 23., -9., -3., 21.,  18., -60. });
+				MatrixX expected(3, 3, { 491, 597, 1002, 1133, -873, 2349, 7, 696, -5532 });
 
 				mi_MS_1 = mi_MS_2 * mi_MS_3;
-				mi_MS_2 *= mi_MS_3;
-				if (mi_MS_1 != mi_MS_2) mi_loc_check = false;
+				if (mi_MS_1 != expected) mi_loc_check = false;
 
 				if (!mi_loc_check) {
-					std::cout << ERROR("MatrixS multiplication operators ( * and *= ) Failed!!");
+					std::cout << ERROR("MatrixS multiplication operator ( * ) Failed!!");
 					mi_glob_check = false;
 					mi_loc_check = true;
 				}
