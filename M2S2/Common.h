@@ -15,17 +15,14 @@
 #pragma once
 
 // Standard libraries
-#include <array>
 #include <vector>
 #include <iostream>		// required by std::cout
 #include <iomanip>		// Required by ios manipulations
 #include <sstream>		// required by std::ostringstream
-#include <cmath>		// required by std::sqrt / std::acos
 #include <utility>      // required by std::move
 #include <algorithm>    // required by std::copy() and std::assign()
 #include <cassert>		// required by assert (programing checks)
 #include <exception>	// required by exception (runtime errors)
-#include <cstdint>		// unsigned long int 64 bits
 
 // Coloring output
 #define RESET "\x1B[0m"

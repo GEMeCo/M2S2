@@ -32,6 +32,7 @@ namespace M2S2 {
       */
     class sparseMatrix {
 
+    // Member Variables
     public:
         /** @brief If not symmetric, sym = false */
         bool mv_sym = false;
@@ -45,14 +46,14 @@ namespace M2S2 {
     public:
         /** M2S2 sparse matrix implementation.
           */
-        sparseMatrix() { }
+        sparseMatrix() = default;
 
         /** M2S2 sparse matrix implementation.
           * @param nLines Number of lines of the sparse matrix.
           * @param sym If not symmetric, sym = false.
           * @param type Row major or Column major ('R' or 'C'). Default is row major.
           */
-        sparseMatrix(const int& nLines, const bool& sym = false, const char& type = 'R') {
+        sparseMatrix(const unsigned int nLines, const bool sym = false, const char type = 'R') {
             mv_type = toupper(type);
             assert(mv_type == 'R' || mv_type == 'C'); // Wrong type
 
@@ -71,7 +72,7 @@ namespace M2S2 {
 
         /** Destructor.
           */
-        ~sparseMatrix() { }
+        ~sparseMatrix() = default;
 
     private:
         // Copy constructor is deleted for obvious reason (2 sparse matrices in memory?).
@@ -90,7 +91,7 @@ namespace M2S2 {
           * @param precision Number of decimal digits after the decimal point (default is 4)
           * @param width Minimum number of characters to be written (default is 8)
           */
-        const std::string print(const int precision = 4, const int width = 8) const
+        const std::string print(const unsigned int precision = 4, const unsigned int width = 8) const
         {
             std::ostringstream output;
             output << std::endl << std::fixed;
@@ -114,7 +115,7 @@ namespace M2S2 {
           * @param other sparse matrix to be copied.
           * @param swap Swap between row major and column major.
           */
-        void copy(M2S2::sparseMatrix& other, bool swap)
+        void copy(M2S2::sparseMatrix& other, const bool swap)
         {
             destroy();
             resize(other.mv_line.size());
@@ -253,7 +254,7 @@ namespace M2S2 {
         /** Resize the matrix. Notice that size is not checked (if it is smaller than current).
           * @param size Size to be allocated and initiated (usually, the number of DOF).
           */
-        void resize(const int& size)
+        void resize(const unsigned int size)
         {
             if (mv_line.size()) destroy();
             mv_line.resize(size);
@@ -282,14 +283,14 @@ namespace M2S2 {
           * @param lineIndex Index of the line to be modified.
           * @param size New size to be allocated.
           */
-        void setLineSize(const int& lineIndex, const int& size) {
+        void setLineSize(const unsigned int lineIndex, const unsigned int size) {
             mv_line.at(lineIndex).reserve(size);
         }
 
         /** Reserve capacity to all lines of the sparse matrix. Notice that size is not checked (if it is smaller than current).
           * @param size New size to be allocated.
           */
-        void setAllLineSize(const int& size) {
+        void setAllLineSize(const unsigned int size) {
             for (int i = 0; i < mv_line.size(); i++)
                 setLineSize(i, size);
         }
@@ -432,7 +433,7 @@ namespace M2S2 {
           * @param indexes Vector with global indexes (dof).
           * @param nItens Number of itens to be pushed
           */
-        void push(double** matrix, int* indexes, int nItens)
+        void push(const double** matrix, const int* indexes, const unsigned int nItens)
         {
             // Reallocate sparse matrix lines when necessary
             reallocateLines(indexes, nItens);
@@ -497,7 +498,7 @@ namespace M2S2 {
         /** Push a vector of triplets to the sparse matrix
           * @param triplets values to be pushed. 
           */
-        void push(std::vector<M2S2::triplet>& triplets)
+        void push(const std::vector<M2S2::triplet>& triplets)
         {
             int row_ind, col_ind;
             double val;
@@ -531,7 +532,7 @@ namespace M2S2 {
           * @param value C-like vector with nItens containing values.
           * @param nItens Number of itens to be pushed.
           */
-        void push(int* row, int* col, double* value, int nItens)
+        void push(const int* row, const int* col, const double* value, const unsigned int nItens)
         {
             int row_ind, col_ind;
             double val;
@@ -563,7 +564,7 @@ namespace M2S2 {
           * @param index Container index of the sparse matrix (begins with 0)
           * @return M2S2::line with row information
           */
-        M2S2::line getRow(int index)
+        M2S2::line getRow(const unsigned int index)
         {
             // if the sparse matrix was saved as column major, and it is not symmetric, this search will take a while...
             if (mv_type == 'C' && !mv_sym) {
@@ -590,7 +591,7 @@ namespace M2S2 {
           * @param index Container index of the sparse matrix (begins with 0)
           * @return M2S2::line with column information
           */
-        M2S2::line getColumn(int index)
+        M2S2::line getColumn(const unsigned int index)
         {
             // if the sparse matrix was saved as row major, and it is not symmetric, this search will take a while...
             if (mv_type == 'R' && !mv_sym) {
@@ -618,7 +619,7 @@ namespace M2S2 {
           * @param col Column index component
           * @return Required term, if any
           */
-        inline double& at(int row, int col)
+        inline double& at(const unsigned int row, const unsigned int col)
         {
             int ind;
 
@@ -649,7 +650,7 @@ namespace M2S2 {
           * @param col Column index component
           * @return Required term, if any
           */
-        inline double& operator()(int row, int col) {
+        inline double& operator () (const unsigned int row, const unsigned int col) {
             return at(row, col);
         }
 
@@ -657,7 +658,7 @@ namespace M2S2 {
           * @param index Row index component
           * @param value valeu to be imposed
           */
-        void setValueToRow(int index, double value)
+        void setValueToRow(const unsigned int index, const double value)
         {
             if (mv_type == 'C') {
                 int ind;
@@ -679,7 +680,7 @@ namespace M2S2 {
           * @param index Row index component
           * @param value valeu to be imposed
           */
-        void setValueToColumn(int index, double value)
+        void setValueToColumn(const unsigned int index, const double value)
         {
             if (mv_type == 'R') {
                 int ind;
@@ -699,7 +700,7 @@ namespace M2S2 {
         /** Set row and column to zero, main diagonal to one
           * @param index Row / Column index component
           */
-        void zeroRowAndColumn(int index) {
+        void zeroRowAndColumn(const unsigned int index) {
             setValueToRow(index, 0.0);
             setValueToColumn(index, 0.0);
             at(index, index) = 1.0;
@@ -725,7 +726,7 @@ namespace M2S2 {
           * @param indexes Vector with global indexes (dof).
           * @param nItens Number of itens to be pushed
           */
-        void reallocateLines(int* indexes, int nItens) {
+        void reallocateLines(const int* indexes, const unsigned int nItens) {
             int mi_curIndex;        // Current index
 
             for (int i = 0; i < nItens; ++i) {

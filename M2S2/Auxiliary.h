@@ -37,7 +37,7 @@ namespace M2S2 {
           * @param col Column number
           * @param value Value of the entry
           */
-        triplet(int row, int col, double value) {
+        triplet(const unsigned int row, const unsigned int col, const double value) {
             mv_row = row;
             mv_col = col;
             mv_value = value;
@@ -59,8 +59,9 @@ namespace M2S2 {
 
         /** Destructor.
           */
-        ~triplet() { }
+        ~triplet() = default;
 
+    // Member Variables
     public:
         /** @brief row index */
         int mv_row;
@@ -77,6 +78,7 @@ namespace M2S2 {
       * @details This CSR class was created only to use in Sparse packages. All operations must be performed in sparseMatrix class.
       */
     class CSR {
+
     public:
         /** M2S2 Compressed Sparse Row matrices.
           */
@@ -107,7 +109,7 @@ namespace M2S2 {
 
         /** Destructor.
           */
-        ~CSR() { }
+        ~CSR() = default;
 
         /** Removes all elements from the matrix, leaving the container empty
           */
@@ -267,6 +269,7 @@ namespace M2S2 {
       * @details These CSC class was created only to output data. All operations must be performed in sparseMatrix class.
       */
     class CSC {
+
     public:
         /** M2S2 Compressed Sparse Row matrices.
           */
@@ -297,7 +300,7 @@ namespace M2S2 {
 
         /** Destructor.
           */
-        ~CSC() { }
+        ~CSC() = default;
 
         /** Removes all elements from the matrix, leaving the container empty
           */
@@ -489,7 +492,7 @@ namespace M2S2 {
     public:
         /** M2S2 row / column constructor.
           */
-        line() {}
+        line() = default;
 
         /** M2S2 row / column constructor.
           * @param index vector of indexes of the values in the line.
@@ -505,7 +508,7 @@ namespace M2S2 {
         /** M2S2 row / column constructor.
           * @param size Size to be allocated.
           */
-        line(const int& size) {
+        line(const unsigned int size) {
             reserve(size);
         }
 
@@ -535,12 +538,12 @@ namespace M2S2 {
 
         /** Destructor.
           */
-        ~line() { }
+        ~line() = default;
 
         /** Move assignment operator for M2S2 line.
           * @param other Line to be moved.
           */
-        line& operator=(line&& other) noexcept
+        line& operator = (line&& other) noexcept
         {
             mv_index = std::move(other.mv_index);
             mv_value = std::move(other.mv_value);
@@ -552,7 +555,7 @@ namespace M2S2 {
         /** Copy assignment operator for M2S2 line.
           * @param other Line to be copied.
           */
-        line& operator=(const line& other)
+        line& operator = (const line& other)
         {
             mv_index.reserve(other.mv_index.capacity());
             mv_value.reserve(other.mv_value.capacity());
@@ -582,7 +585,7 @@ namespace M2S2 {
         /** Reserve capacity to the line. Notice that size is not checked (if it is smaller than current).
           * @param size New size to be allocated.
           */
-        void reserve(const int& size)
+        void reserve(const unsigned int& size)
         {
             mv_index.reserve(size);
             mv_value.reserve(size);
@@ -675,7 +678,7 @@ namespace M2S2 {
         /** @return the position in line of index. If index is not found return -1.
           * @param index Index to be found.
           */
-        int search(int& index)
+        unsigned int search(const unsigned int index)
         {
             // Trying to enhance performance by using a bissection search algorithm
             if (mv_index.size()) {
@@ -716,7 +719,7 @@ namespace M2S2 {
         /** @return the position in line of index. If index is not found return -1.
           * @param index Index to be found.
           */
-        int search(int index) const
+        unsigned int search(const unsigned int index) const
         {
             assert(mv_assembled); // Const version can only be used with already sorted line.
 
@@ -795,7 +798,7 @@ namespace M2S2 {
     private:
 
         /* Intended just to test search */
-        const int naiveSearch(const int& index)
+        const unsigned int naiveSearch(const unsigned int index)
         {
             if (mv_index.size()) {
                 if (!mv_assembled) addEqualTerms();

@@ -29,6 +29,13 @@ namespace M2S2 {
 	 */
 	class MatrixX {
 
+	// Member Variables
+	private:
+		unsigned int mv_nRow;		// Number of rows
+		unsigned int mv_nCol;		// Number of columns
+		unsigned int mv_nSize;		// Number of stored values
+		std::vector<double> mv_Values;
+
 	public:
 		/** 2nd rank matrices of any size. Values are saved in a single vector, as row major.
 		  */
@@ -44,7 +51,7 @@ namespace M2S2 {
 		  * @param nRow Number of rows
 		  * @param nCol Number of columns
 		  */
-		MatrixX(unsigned int nRow, unsigned int nCol) : mv_nRow(nRow), mv_nCol(nCol)
+		MatrixX(const unsigned int nRow, const unsigned int nCol) : mv_nRow(nRow), mv_nCol(nCol)
 		{
 			mv_nSize = mv_nRow * mv_nCol;
 			mv_Values.resize(mv_nSize);
@@ -55,7 +62,7 @@ namespace M2S2 {
 		  * @param nCol Number of columns
 		  * @param value Value to initiate the entire matrix.
 		  */
-		MatrixX(unsigned int nRow, unsigned int nCol, const double& value) : mv_nRow(nRow), mv_nCol(nCol)
+		MatrixX(const unsigned int nRow, const unsigned int nCol, const double& value) : mv_nRow(nRow), mv_nCol(nCol)
 		{
 			mv_nSize = mv_nRow * mv_nCol;
 			mv_Values.resize(mv_nSize, value);
@@ -66,7 +73,7 @@ namespace M2S2 {
 		  * @param nCol Number of columns
 		  * @param value Vector with enough values to initiate the matrix.
 		  */
-		MatrixX(unsigned int nRow, unsigned int nCol, const std::vector<double>& value) : mv_nRow(nRow), mv_nCol(nCol)
+		MatrixX(const unsigned int nRow, const unsigned int nCol, const std::vector<double>& value) : mv_nRow(nRow), mv_nCol(nCol)
 		{
 			mv_nSize = mv_nRow * mv_nCol;
 
@@ -92,7 +99,7 @@ namespace M2S2 {
 
 		/** Destructor.
 		  */
-		~MatrixX() { }
+		~MatrixX() = default;
 
 		/** Overloads operator << to stream the matrix. */
 		friend std::ostream& operator<<(std::ostream& output, const MatrixX& matrix)
@@ -118,7 +125,7 @@ namespace M2S2 {
 		  * @param precision Number of decimal digits after the decimal point (default is 4)
 		  * @param width Minimum number of characters to be written (default is 8)
 		  */
-		const std::string print(const int precision = 4, const int width = 8) const
+		const std::string print(const unsigned int precision = 4, const unsigned int width = 8) const
 		{
 			std::ostringstream output;
 			output << std::endl;
@@ -156,7 +163,7 @@ namespace M2S2 {
 		  * @param nRow Number of rows
 		  * @param nCol Number of columns
 		  */
-		void resize(const unsigned int& nRow, const unsigned int& nCol)
+		void resize(const unsigned int nRow, const unsigned int nCol)
 		{
 			mv_nRow = nRow;
 			mv_nCol = nCol;
@@ -169,7 +176,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& at(unsigned int i, unsigned int j) { 
+		inline double& at(const unsigned int i, const unsigned int j) { 
 			if (i > mv_nRow || j > mv_nCol) throw std::out_of_range(ERROR("One of components is out of range in MatrixX method .at"));
 			return mv_Values.at(i * mv_nCol + j);
 		}
@@ -178,7 +185,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& at(unsigned int i, unsigned int j) const {
+		inline const double& at(const unsigned int i, const unsigned int j) const {
 			if (i > mv_nRow || j > mv_nCol) throw std::out_of_range(ERROR("One of components is out of range in MatrixX method .at"));
 			return mv_Values.at(i * mv_nCol + j);
 		}
@@ -187,7 +194,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& operator()(unsigned int i, unsigned int j) {
+		inline double& operator () (const unsigned int i, const unsigned int j) {
 			if (i > mv_nRow || j > mv_nCol) throw std::out_of_range(ERROR("One of components is out of range in MatrixX method .at"));
 			return mv_Values.at(i * mv_nCol + j);
 		}
@@ -196,7 +203,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& operator()(unsigned int i, unsigned int j) const {
+		inline const double& operator () (const unsigned int i, const unsigned int j) const {
 			if (i > mv_nRow || j > mv_nCol) throw std::out_of_range(ERROR("One of components is out of range in MatrixX method .at"));
 			return mv_Values.at(i * mv_nCol + j);
 		}
@@ -225,10 +232,14 @@ namespace M2S2 {
 		  */
 		std::vector<double>::const_iterator begin() const { return mv_Values.begin(); }
 
+		/** @return a iterator to the end of the storing vector, providing direct access to the values.
+		  */
+		std::vector<double>::const_iterator end() const { return mv_Values.end(); }
+
 		/** Overloads operator = for copy assignment operations -> T = O
 		  * @param other Matrix to be copied.
 		  */
-		MatrixX& operator=(const MatrixX& other)
+		MatrixX& operator = (const MatrixX& other)
 		{
 			if (this == &other) {
 				return *this;
@@ -252,7 +263,7 @@ namespace M2S2 {
 		/** Overloads operator = for move assignment operations -> T = &O
 		  * @param other Matrix to be moved.
 		  */
-		MatrixX& operator=(MatrixX&& other) noexcept
+		MatrixX& operator = (MatrixX&& other) noexcept
 		{
 			if (this != &other) {
 				mv_nRow = other.mv_nRow;
@@ -270,7 +281,7 @@ namespace M2S2 {
 		/** Overloads operator == for comparison operations
 		  * @param other Matrix to be compared.
 		  */
-		bool operator==(const MatrixX& other)
+		bool operator == (const MatrixX& other) const
 		{
 			bool mi_check = true;
 			if (mv_nSize == other.mv_nSize && mv_nRow == other.mv_nRow && mv_nCol == other.mv_nCol) {
@@ -288,7 +299,7 @@ namespace M2S2 {
 		/** Overloads operator != for comparison operations
 		  * @param other Matrix to be compared.
 		  */
-		bool operator!=(const MatrixX& other)
+		bool operator != (const MatrixX& other) const
 		{
 			if (*this == other) return false;
 			return true;
@@ -297,7 +308,7 @@ namespace M2S2 {
 		/** Overloads operator += for cumulative addition -> T += O -> T = T + O
 		  * @param other Matrix to be added.
 		  */
-		MatrixX& operator+=(const MatrixX& other)
+		MatrixX& operator += (const MatrixX& other)
 		{
 			check_order(other);
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
@@ -309,7 +320,7 @@ namespace M2S2 {
 		/** Overloads operator -= for cumulative substraction -> T -= O -> T = T - O
 		  * @param other Matrix to be substracted.
 		  */
-		MatrixX& operator-=(const MatrixX& other)
+		MatrixX& operator -= (const MatrixX& other)
 		{
 			check_order(other);
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
@@ -321,7 +332,7 @@ namespace M2S2 {
 		/** Overloads operator *= for cumulative multiplication -> T *= O -> T_ij = T_ik * O_kj
 		  * @param other Matrix to be multiplied with.
 		  */
-		MatrixX& operator*=(const MatrixX& other)
+		MatrixX& operator *= (const MatrixX& other)
 		{
 			if (mv_nCol != other.mv_nRow) throw std::range_error(ERROR("Invalid request in MatrixX dot product: Internal order of matrices differ!"));
 
@@ -340,7 +351,7 @@ namespace M2S2 {
 		/** Overloads operator + for addition -> T = T + O
 		  * @param other Matrix to be added.
 		  */
-		MatrixX operator+(const MatrixX& other) const
+		MatrixX operator + (const MatrixX& other) const
 		{
 			check_order(other);
 			MatrixX result(*this);
@@ -353,7 +364,7 @@ namespace M2S2 {
 		/** Overloads operator - for substraction -> T = T - O
 		  * @param other Matrix to be substracted.
 		  */
-		MatrixX operator-(const MatrixX& other) const
+		MatrixX operator - (const MatrixX& other) const
 		{
 			check_order(other);
 			MatrixX result(*this);
@@ -363,10 +374,22 @@ namespace M2S2 {
 			return result;
 		}
 
+		/** Overloads operator - for unary negation -> T = -T
+		  * @param other Dyadic to be substracted.
+		  */
+		MatrixX operator - () const
+		{
+			MatrixX result(this->mv_nRow, this->mv_nCol);
+			for (unsigned int i = 0; i < mv_Values.size(); ++i) {
+				result.mv_Values.at(i) -= this->mv_Values.at(i);
+			}
+			return result;
+		}
+
 		/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
 		  * @param other Matrix to be multiplied with.
 		  */
-		MatrixX operator*(const MatrixX& other) const
+		MatrixX operator * (const MatrixX& other) const
 		{
 			if (mv_nCol != other.mv_nRow) throw std::range_error(ERROR("Invalid request in MatrixX dot product: Internal order of matrices differ!"));
 
@@ -385,7 +408,7 @@ namespace M2S2 {
 		  * @param vec Vector to be multiplied with.
 		  * @return a vector with the inner product.
 		  */
-		std::vector<double> operator*(const std::vector<double>& vec)
+		std::vector<double> operator * (const std::vector<double>& vec)
 		{
 			if (vec.size() != mv_nCol) throw std::range_error(ERROR("Invalid request in MatrixX dot product: Order of tensor and vector differ!"));
 
@@ -402,7 +425,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be added.
 		  * @return a matrix with the result.
 		  */
-		MatrixX operator+(const double& alfa) const
+		MatrixX operator + (const double alfa) const
 		{
 			MatrixX result(*this);
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
@@ -415,7 +438,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be substracted.
 		  * @return a matrix with the result.
 		  */
-		MatrixX operator-(const double& alfa) const
+		MatrixX operator - (const double alfa) const
 		{
 			MatrixX result(*this);
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
@@ -428,7 +451,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be multiplied with.
 		  * @return a matrix with the result.
 		  */
-		MatrixX operator*(const double& alfa) const
+		MatrixX operator * (const double alfa) const
 		{
 			MatrixX result(*this);
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
@@ -441,7 +464,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be divided with.
 		  * @return a matrix with the result.
 		  */
-		MatrixX operator/(const double& alfa) const
+		MatrixX operator / (const double& alfa) const
 		{
 			if ((int)(alfa * 100000) == 0) {
 				throw std::invalid_argument(ERROR("Invalid argument in MatrixX division operator: Division by zero!"));
@@ -458,7 +481,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be added.
 		  * @return a matrix with the result.
 		  */
-		MatrixX& operator+=(const double& alfa)
+		MatrixX& operator += (const double alfa)
 		{
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
 				mv_Values.at(i) += alfa;
@@ -470,7 +493,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be substracted.
 		  * @return a matrix with the result.
 		  */
-		MatrixX& operator-=(const double& alfa)
+		MatrixX& operator -= (const double alfa)
 		{
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
 				mv_Values.at(i) -= alfa;
@@ -482,7 +505,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be multiplied with.
 		  * @return a matrix with the result.
 		  */
-		MatrixX& operator*=(const double& alfa)
+		MatrixX& operator *= (const double alfa)
 		{
 			for (unsigned int i = 0; i < mv_Values.size(); i++) {
 				mv_Values.at(i) *= alfa;
@@ -494,7 +517,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be divided with.
 		  * @return a matrix with the result.
 		  */
-		MatrixX& operator/=(const double& alfa)
+		MatrixX& operator /= (const double alfa)
 		{
 			if ((int)(alfa * 100000) == 0) {
 				throw std::invalid_argument(ERROR("Invalid argument in MatrixX division operator: Division by zero!"));
@@ -535,10 +558,6 @@ namespace M2S2 {
 		}
 
 	private:
-		unsigned int mv_nRow;		// Number of rows
-		unsigned int mv_nCol;		// Number of columns
-		unsigned int mv_nSize;		// Number of stored values
-		std::vector<double> mv_Values;
 
 		inline void check_order(const MatrixX& other) const
 		{

@@ -29,6 +29,13 @@ namespace M2S2 {
 	 * @details Asymmetric 2nd order (rank) tensors of 2 or 3 dimensional vector space (saved in Voigt notation using row major).
 	 */
 	class Dyadic2N {
+
+	// Member Variables
+	private:
+		unsigned int mv_nDim;		// Dimensionality of space (2D or 3D)
+		unsigned int mv_nSize;		// Number of components in Voigt notation
+		std::vector<double> mv_Values;
+
 	public:
 		/** Asymmetric 2nd order tensor.
 		  */
@@ -42,7 +49,7 @@ namespace M2S2 {
 		/** Asymmetric 2nd order tensor, for 2 or 3 dimensional vector space.
 		  * @param nDim Dimensionality of vector space
 		  */
-		Dyadic2N(unsigned int nDim) : mv_nDim(nDim)
+		Dyadic2N(const unsigned int nDim) : mv_nDim(nDim)
 		{
 			if (mv_nDim != 2 && mv_nDim != 3) throw std::invalid_argument(ERROR("Invalid argument on Dyadic2N constructor: Wrong input in the size of vector space!"));
 
@@ -54,7 +61,7 @@ namespace M2S2 {
 		  * @param nDim Dimensionality of vector space.
 		  * @param value Value to initiate the entire dyadic.
 		  */
-		Dyadic2N(unsigned int nDim, const double& value) : mv_nDim(nDim)
+		Dyadic2N(const unsigned int nDim, const double value) : mv_nDim(nDim)
 		{
 			if (mv_nDim != 2 && mv_nDim != 3) throw std::invalid_argument(ERROR("Invalid argument on Dyadic2N constructor: Wrong input in the size of vector space!"));
 
@@ -93,13 +100,13 @@ namespace M2S2 {
 
 		/** Destructor.
 		  */
-		~Dyadic2N() { }
+		~Dyadic2N() = default;
 
 		/** Generate an identity with the required dimensionality.
 		  * @param nDim Dyadic dimensionality.
 		  * @param value Diagonal value. Default is 1.
 		  */
-		static Dyadic2N identity(unsigned int nDim, const double& value = double(1))
+		static Dyadic2N identity(const unsigned int nDim, const double value = double(1))
 		{
 			Dyadic2N result(nDim);
 			for (unsigned int i = 0; i < result.mv_nDim; ++i) {
@@ -132,7 +139,7 @@ namespace M2S2 {
 		  * @param precision Number of decimal digits after the decimal point (default is 4)
 		  * @param width Minimum number of characters to be written (default is 8)
 		  */
-		const std::string print(const int precision = 4, const int width = 8) const
+		const std::string print(const unsigned int precision = 4, const unsigned int width = 8) const
 		{
 			std::ostringstream output;
 			output << std::endl;
@@ -169,7 +176,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& at(unsigned int i, unsigned int j) {
+		inline double& at(const unsigned int i, const unsigned int j) {
 			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
@@ -181,7 +188,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& at(unsigned int i, unsigned int j) const {
+		inline const double& at(const unsigned int i, const unsigned int j) const {
 			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
@@ -193,7 +200,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline double& operator()(unsigned int i, unsigned int j) {
+		inline double& operator () (const unsigned int i, const unsigned int j) {
 			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
@@ -205,7 +212,7 @@ namespace M2S2 {
 		  * @param i First component.
 		  * @param j Second component.
 		  */
-		inline const double& operator()(unsigned int i, unsigned int j) const {
+		inline const double& operator () (const unsigned int i, const unsigned int j) const {
 			if (i > mv_nDim || j > mv_nDim) throw std::out_of_range(ERROR("One of components is out of range in Dyadic2N method .at"));
 
 			unsigned int pos = i * mv_nDim + j;
@@ -256,10 +263,14 @@ namespace M2S2 {
 		  */
 		std::vector<double>::const_iterator begin() const { return mv_Values.begin(); }
 
+		/** @return a iterator to the end of the storing vector, providing direct access to the values.
+		  */
+		std::vector<double>::const_iterator end() const { return mv_Values.end(); }
+
 		/** Overloads operator = for copy assignment operations -> T = O
 		  * @param other Dyadic to be copied.
 		  */
-		Dyadic2N& operator=(const Dyadic2N& other)
+		Dyadic2N& operator = (const Dyadic2N& other)
 		{
 			if (this == &other) {
 				return *this;
@@ -282,7 +293,7 @@ namespace M2S2 {
 		/** Overloads operator = for move assignment operations -> T = &O
 		  * @param other Dyadic to be moved.
 		  */
-		Dyadic2N& operator=(Dyadic2N&& other) noexcept
+		Dyadic2N& operator = (Dyadic2N&& other) noexcept
 		{
 			if (this != &other) {
 				mv_nDim = other.mv_nDim;
@@ -298,7 +309,7 @@ namespace M2S2 {
 		/** Overloads operator == for comparison operations
 		  * @param other Dyadic to be compared.
 		  */
-		bool operator==(const Dyadic2N& other)
+		bool operator == (const Dyadic2N& other) const
 		{
 			bool mi_check = true;
 			if (mv_nDim == other.mv_nDim && mv_nSize == other.mv_nSize) {
@@ -316,7 +327,7 @@ namespace M2S2 {
 		/** Overloads operator == for comparison operations
 		  * @param other Dyadic to be compared.
 		  */
-		bool operator==(const Dyadic2S& other)
+		bool operator == (const Dyadic2S& other) const
 		{
 			bool mi_check = true;
 			if (rows() == other.rows() && cols() == other.cols()) {
@@ -336,7 +347,7 @@ namespace M2S2 {
 		/** Overloads operator != for comparison operations
 		  * @param other Dyadic to be compared.
 		  */
-		bool operator!=(const Dyadic2N& other)
+		bool operator != (const Dyadic2N& other) const
 		{
 			if (*this == other) return false;
 			return true;
@@ -345,7 +356,7 @@ namespace M2S2 {
 		/** Overloads operator != for comparison operations
 		  * @param other Dyadic to be compared.
 		  */
-		bool operator!=(const Dyadic2S& other)
+		bool operator != (const Dyadic2S& other) const
 		{
 			if (*this == other) return false;
 			return true;
@@ -354,7 +365,7 @@ namespace M2S2 {
 		/** Overloads operator += for cumulative addition -> T += O -> T = T + O
 		  * @param other Dyadic to be added.
 		  */
-		Dyadic2N& operator+=(const Dyadic2N& other)
+		Dyadic2N& operator += (const Dyadic2N& other)
 		{
 			check_order(other);
 			for (unsigned int i = 0; i < mv_nSize; i++) {
@@ -366,7 +377,7 @@ namespace M2S2 {
 		/** Overloads operator -= for cumulative substraction -> T -= O -> T = T - O
 		  * @param other Dyadic to be substracted.
 		  */
-		Dyadic2N& operator-=(const Dyadic2N& other)
+		Dyadic2N& operator -= (const Dyadic2N& other)
 		{
 			check_order(other);
 			for (unsigned int i = 0; i < mv_nSize; i++) {
@@ -378,7 +389,7 @@ namespace M2S2 {
 		/** Overloads operator *= for cumulative multiplication -> T *= O -> T_ij = T_ik * O_kj
 		  * @param other Dyadic to be multiplied with.
 		  */
-		Dyadic2N& operator*=(const Dyadic2N& other)
+		Dyadic2N& operator *= (const Dyadic2N& other)
 		{
 			check_order(other);
 			Dyadic2N result(mv_nDim);
@@ -397,7 +408,7 @@ namespace M2S2 {
 		/** Overloads operator + for addition -> T = T + O
 		  * @param other Dyadic to be added.
 		  */
-		Dyadic2N operator+(const Dyadic2N& other) const
+		Dyadic2N operator + (const Dyadic2N& other) const
 		{
 			check_order(other);
 			Dyadic2N result(*this);
@@ -410,7 +421,7 @@ namespace M2S2 {
 		/** Overloads operator - for substraction -> T = T - O
 		  * @param other Dyadic to be substracted.
 		  */
-		Dyadic2N operator-(const Dyadic2N& other) const
+		Dyadic2N operator - (const Dyadic2N& other) const
 		{
 			check_order(other);
 			Dyadic2N result(*this);
@@ -420,10 +431,22 @@ namespace M2S2 {
 			return result;
 		}
 
+		/** Overloads operator - for unary negation -> T = -T
+		  * @param other Dyadic to be substracted.
+		  */
+		Dyadic2N operator - () const
+		{
+			Dyadic2N result(this->mv_nDim);
+			for (unsigned int i = 0; i < mv_Values.size(); ++i) {
+				result.mv_Values.at(i) -= this->mv_Values.at(i);
+			}
+			return result;
+		}
+
 		/** Overloads operator * for multiplication -> T_ij = T_ik * O_kj
 		  * @param other Dyadic to be multiplied with.
 		  */
-		Dyadic2N operator*(const Dyadic2N& other) const
+		Dyadic2N operator * (const Dyadic2N& other) const
 		{
 			check_order(other);
 			Dyadic2N result(mv_nDim);
@@ -442,7 +465,7 @@ namespace M2S2 {
 		  * @param vec Vector to be multiplied with.
 		  * @return a vector with the inner product.
 		  */
-		std::vector<double> operator*(const std::vector<double>& vec)
+		std::vector<double> operator * (const std::vector<double>& vec)
 		{
 			if (vec.size() != mv_nDim) throw std::range_error(ERROR("Invalid request in Dyadic2N dot product: Order of tensor and vector differ!"));
 
@@ -459,7 +482,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be added.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N operator+(const double& alfa) const
+		Dyadic2N operator + (const double alfa) const
 		{
 			Dyadic2N result(*this);
 			for (unsigned int i = 0; i < mv_nDim; i++) {
@@ -472,7 +495,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be substracted.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N operator-(const double& alfa) const
+		Dyadic2N operator - (const double alfa) const
 		{
 			Dyadic2N result(*this);
 			for (unsigned int i = 0; i < mv_nDim; i++) {
@@ -485,7 +508,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be multiplied with.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N operator*(const double& alfa) const
+		Dyadic2N operator * (const double alfa) const
 		{
 			Dyadic2N result(*this);
 			for (unsigned int i = 0; i < mv_nSize; i++) {
@@ -498,7 +521,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be divided with.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N operator/(const double& alfa) const
+		Dyadic2N operator / (const double alfa) const
 		{
 			if ((int)(alfa * 100000) == 0) {
 				throw std::invalid_argument(ERROR("Invalid argument in Dyadic2N division operator: Division by zero!"));
@@ -515,7 +538,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be added.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N& operator+=(const double& alfa)
+		Dyadic2N& operator += (const double alfa)
 		{
 			for (unsigned int i = 0; i < mv_nDim; i++) {
 				mv_Values.at(i) += alfa;
@@ -527,7 +550,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be substracted.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N& operator-=(const double& alfa)
+		Dyadic2N& operator -= (const double alfa)
 		{
 			for (unsigned int i = 0; i < mv_nDim; i++) {
 				mv_Values.at(i) -= alfa;
@@ -539,7 +562,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be multiplied with.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N& operator*=(const double& alfa)
+		Dyadic2N& operator *= (const double alfa)
 		{
 			for (unsigned int i = 0; i < mv_nSize; i++) {
 				mv_Values.at(i) *= alfa;
@@ -551,7 +574,7 @@ namespace M2S2 {
 		  * @param alfa Scalar to be divided with.
 		  * @return a dyadic with the result.
 		  */
-		Dyadic2N& operator/=(const double& alfa)
+		Dyadic2N& operator /= (const double alfa)
 		{
 			if ((int)(alfa * 100000) == 0) {
 				throw std::invalid_argument(ERROR("Invalid argument in Dyadic2N division operator: Division by zero!"));
@@ -781,9 +804,6 @@ namespace M2S2 {
 		}
 
 	private:
-		unsigned int mv_nDim;		// Dimensionality of space (2D or 3D)
-		unsigned int mv_nSize;		// Number of components in Voigt notation
-		std::vector<double> mv_Values;
 
 		inline void check_order(const Dyadic2N& other) const
 		{

@@ -71,8 +71,12 @@ Features
     - :boom: Save the sparseMatrix as CSR or CSC (Compressed Sparse Row or Compressed Sparse Column)
     - :boom: All features of M2S2 dyadics and matrices (but sparse) may be verified by unitTest() function.
 
-- v.1.0: M2S2 goes gold
+- v1.0.0: M2S2 goes gold
     - :boom: Finally, it is fully open for your use. Good luck.
+
+- v1.0.1: Added DOI.
+- v1.0.2: Fixed symmetric multiplication.
+- v1.0.3: Syntax improvements.
 
 Resources
 ---------
