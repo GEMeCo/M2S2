@@ -377,6 +377,13 @@ namespace M2S2 {
                                 mv_line.at(col).mv_index.push_back(row);
                                 mv_line.at(col).mv_value.push_back(matrix.at(i, j));
                             }
+
+                            // FIX: If there are repetead indexes, must also push row > col
+                            // Only happens for symmetric matrices
+                            if (row == col && i != j) {
+                                mv_line.at(row).mv_index.push_back(col);
+                                mv_line.at(row).mv_value.push_back(matrix.at(i, j));
+                            }
                         }
                         mv_line.at(row).mv_assembled = false;
                     }
@@ -394,6 +401,13 @@ namespace M2S2 {
                             else {
                                 mv_line.at(row).mv_index.push_back(col);
                                 mv_line.at(row).mv_value.push_back(matrix.at(i, j));
+                            }
+
+                            // FIX: If there are repetead indexes, must also push row > col
+                            // Only happens for symmetric matrices
+                            if (row == col && i != j) {
+                                mv_line.at(col).mv_index.push_back(row);
+                                mv_line.at(col).mv_value.push_back(matrix.at(i, j));
                             }
                         }
                         mv_line.at(row).mv_assembled = false;
@@ -428,10 +442,10 @@ namespace M2S2 {
             }
         }
 
-        /** Push a double** to the sparse matrix
+        /** Push a double** to the sparse matrix (C-like matrices)
           * @param matrix double** to be included (must be Square).
           * @param indexes Vector with global indexes (dof).
-          * @param nItens Number of itens to be pushed
+          * @param nItens Size of matrix (number of row/columns)
           */
         void push(const double** matrix, const int* indexes, const unsigned int nItens)
         {
@@ -448,8 +462,22 @@ namespace M2S2 {
                         for (int j = i; j < nItens; j++) {
                             col = indexes[j];
 
-                            mv_line.at(row).mv_index.push_back(col);
-                            mv_line.at(row).mv_value.push_back(matrix[i][j]);
+                            // FIX: Repeated indexes are now pushed correctly
+                            if (row < col) {
+                                mv_line.at(row).mv_index.push_back(col);
+                                mv_line.at(row).mv_value.push_back(matrix[i][j]);
+                            }
+                            else {
+                                mv_line.at(col).mv_index.push_back(row);
+                                mv_line.at(col).mv_value.push_back(matrix[i][j]);
+                            }
+
+                            // FIX: If there are repetead indexes, must also push row > col
+                            // Only happens for symmetric matrices
+                            if (row == col && i != j) {
+                                mv_line.at(row).mv_index.push_back(col);
+                                mv_line.at(row).mv_value.push_back(matrix[i][j]);
+                            }
                         }
                         mv_line.at(row).mv_assembled = false;
                     }
@@ -460,8 +488,22 @@ namespace M2S2 {
                         for (int j = i; j < nItens; j++) {
                             col = indexes[j];
 
-                            mv_line.at(col).mv_index.push_back(row);
-                            mv_line.at(col).mv_value.push_back(matrix[i][j]);
+                            // FIX: Repeated indexes are now pushed correctly
+                            if (col < row) {
+                                mv_line.at(col).mv_index.push_back(row);
+                                mv_line.at(col).mv_value.push_back(matrix[i][j]);
+                            }
+                            else {
+                                mv_line.at(row).mv_index.push_back(col);
+                                mv_line.at(row).mv_value.push_back(matrix[i][j]);
+                            }
+
+                            // FIX: If there are repetead indexes, must also push row > col
+                            // Only happens for symmetric matrices
+                            if (row == col && i != j) {
+                                mv_line.at(col).mv_index.push_back(row);
+                                mv_line.at(col).mv_value.push_back(matrix[i][j]);
+                            }
                         }
                         mv_line.at(row).mv_assembled = false;
                     }
@@ -526,7 +568,7 @@ namespace M2S2 {
             }
         }
 
-        /** Push triplets to the sparse matrix (C-like)
+        /** Push triplets to the sparse matrix (C-like triplets)
           * @param row C-like vector with nItens containing row indexes.
           * @param col C-like vector with nItens containing column indexes.
           * @param value C-like vector with nItens containing values.
